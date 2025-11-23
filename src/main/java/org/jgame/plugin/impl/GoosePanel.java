@@ -26,6 +26,7 @@
 
 package org.jgame.plugin.impl;
 
+import org.jgame.logic.engine.GameRules;
 import org.jgame.logic.games.goose.GooseRules;
 import org.jgame.plugin.ui.GamePanel;
 
@@ -42,6 +43,28 @@ import java.awt.*;
  * 
  * @author Silvere Martin-Michiellot
  * @version 1.0
+ */
+public class GoosePanel extends GamePanel {
+
+    private final GooseRules gooseRules;
+
+    /**
+     * Creates a new Goose panel.
+     * 
+     * @param rules the goose game rules
+     */
+    public GoosePanel(GameRules rules) {
+        super(rules);
+        if (!(rules instanceof GooseRules)) {
+            throw new IllegalArgumentException("Rules must be GooseRules");
+        }
+        this.gooseRules = (GooseRules) rules;
+    }
+
+    @Override
+    protected void renderGame(Graphics2D g2d) {
+        // Simple rendering - spiral board with 63 squares
+        int width = getWidth();
         int height = getHeight();
 
         // Draw background
