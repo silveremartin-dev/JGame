@@ -60,9 +60,9 @@ public class GooseRules extends AbstractRuleset {
     // Any player whose dice land on one of the geese placed 9 by 9, doubles his
     // point until he encounters no more.
     // If from the first throw of the dice, we roll 9, by 6 and 3 we will place
-    // ourselves at n° 26, or by 5 and 4 at 53. If from the first throw of the dice,
+    // ourselves at nÂ° 26, or by 5 and 4 at 53. If from the first throw of the dice,
     // we bring 6, where there is a bridge, we will be placed at number 12.
-    // Accidents – Whoever gets to No. 19, Inn, pays the fine and stays there until
+    // Accidents â€“ Whoever gets to No. 19, Inn, pays the fine and stays there until
     // the other players have each played twice.
     // Whoever arrives at number 31, where there is a well, pays the fine and stays
     // there until another player, arriving at the same number, takes him out: he
@@ -119,7 +119,7 @@ public class GooseRules extends AbstractRuleset {
                     }
                 };
                 currentPlayer.setType(AbstractPlayer.BIOLOGICAL);
-                currentPlayer.setId();
+                currentPlayer.setId("player_" + i);
                 currentPlayer.setState(PlayerInterface.START_STATE);
                 currentPlayer.setScore(new DoubleScore(1));
                 // TODO: Set initial position properly once board node structure is finalized

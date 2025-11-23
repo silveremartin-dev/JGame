@@ -31,6 +31,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jgame.server.GameUser;
 import org.jgame.util.PasswordEncoderSingleton;
+import org.jgame.util.TextAndMnemonicUtils;
 import org.jgame.ui.AboutDialog;
 import org.jgame.ui.LookAndFeelData;
 import org.jgame.ui.ChangeLookAndFeelAction;
@@ -408,7 +409,7 @@ public class GameClient extends JFrame {
     /**
      * Returns the menuBar
      */
-    public JMenuBar getMenuBar() {
+    public JMenuBar getJMenuBar() {
         return menuBar;
     }
 
@@ -477,9 +478,6 @@ public class GameClient extends JFrame {
      * Returns a mnemonic from the resource bundle. Typically used as
      * keyboard shortcuts in menu items.
      */
-    public char getMnemonic(String key) {
-        return (getString(key)).charAt(0);
-    }
 
     /**
      * Creates an icon from an image contained in the "images" directory.
@@ -647,10 +645,25 @@ public class GameClient extends JFrame {
         }
 
         public void run() {
-            SwingUtilities.invokeLater(GameClientApplication::loadModules);
+            SwingUtilities.invokeLater(() -> GameClient.loadModules());
         }
     }
 
+    /**
+     * Gets the input map for key bindings.
+     * GameClient extends JFrame, so delegate to root pane.
+     */
+    public InputMap getInputMap(int condition) {
+        return getRootPane().getInputMap(condition);
+    }
+
+    /**
+     * Gets the action map for actions.
+     * GameClient extends JFrame, so delegate to root pane.
+     */
+    public ActionMap getActionMap() {
+        return getRootPane().getActionMap();
+    }
 
     /**
      * Loads game modules.
@@ -662,6 +675,7 @@ public class GameClient extends JFrame {
 
     /**
      * Gets mnemonic from resource key.
+     * 
      * @param key the resource key
      * @return the mnemonic character code
      */
