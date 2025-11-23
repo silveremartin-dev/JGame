@@ -156,5 +156,15 @@ public final class GamePluginRegistry {
         // Plugins will be registered here
         // This is called during initialization
         LOGGER.info("Initializing GamePluginRegistry");
+
+        try {
+            // Register built-in games
+            // Note: In a modular system, these would be discovered via ServiceLoader
+            registerPlugin(new org.jgame.plugin.impl.GoosePlugin());
+            registerPlugin(new org.jgame.plugin.impl.ChessPlugin());
+            registerPlugin(new org.jgame.plugin.impl.CheckersPlugin());
+        } catch (Exception e) {
+            LOGGER.severe("Failed to register built-in plugins: " + e.getMessage());
+        }
     }
 }

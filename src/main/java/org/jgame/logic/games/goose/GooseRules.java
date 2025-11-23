@@ -34,16 +34,14 @@ import org.jgame.parts.PlayerInterface;
 import org.jgame.parts.boards.AbstractLineBoard;
 import org.jgame.parts.players.AbstractPlayer;
 import org.jgame.parts.tiles.AbstractSquareTile;
-import org.jgame.persistence.model.GameUser;
+import org.jgame.server.GameUser;
 import org.jgame.util.Graph;
 import org.jgame.util.RandomGenerator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 public class GooseRules extends GameRules {
 
@@ -54,6 +52,7 @@ public class GooseRules extends GameRules {
 
     private Graph board;
     private List<AbstractPlayer> players;
+    private List<GameUser> gameUsers; // Store original GameUsers
     private int[] playOrder;
     private int[] inGameState;
     private int turnNumber;
@@ -66,6 +65,7 @@ public class GooseRules extends GameRules {
 
     public GooseRules() {
         this.players = new ArrayList<>();
+        this.gameUsers = new ArrayList<>();
     }
 
     @Override
@@ -73,6 +73,8 @@ public class GooseRules extends GameRules {
         if (gameStarted) {
             throw new IllegalStateException("Cannot add players after game has started");
         }
+        gameUsers.add(player);
+
         AbstractPlayer abstractPlayer = new AbstractPlayer() {
             @Override
             public List<ActionInterface> computeNextActions(Gameplay gameplay) {
@@ -87,6 +89,15 @@ public class GooseRules extends GameRules {
     }
 
     @Override
+    public List<GameUser> getPlayers() {
+        return new ArrayList<>(gameUsers);
+    }
+
+    public List<AbstractPlayer> getAbstractPlayers() {
+        return players;
+    }
+
+    @Override
     public boolean isFinished() {
         return gameFinished;
     }
@@ -96,14 +107,12 @@ public class GooseRules extends GameRules {
         return winner;
     }
 
-    @Override
     public String getCurrentTurn() {
         if (players.isEmpty())
             return "No players";
         return "Player " + (turnIndex + 1);
     }
 
-    @Override
     public void startGame() {
         if (players.size() < 2) {
             throw new IllegalStateException("Need at least 2 players");
@@ -130,10 +139,6 @@ public class GooseRules extends GameRules {
 
     public Graph getBoard() {
         return board;
-    }
-
-    public List<AbstractPlayer> getPlayers() {
-        return players;
     }
 
     private int[] generatePlayOrder() {

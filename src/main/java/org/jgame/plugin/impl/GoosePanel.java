@@ -101,7 +101,7 @@ public class GoosePanel extends GamePanel {
 
         // Draw game status
         g2d.setFont(new Font("Arial", Font.PLAIN, 14));
-        g2d.drawString("Players: " + gooseRules.getPlayers().size(), 20, height - 40);
+        g2d.drawString("Players: " + gooseRules.getAbstractPlayers().size(), 20, height - 40);
         g2d.drawString("Status: " + (gooseRules.isFinished() ? "Finished" : "In Progress"),
                 20, height - 20);
     }
