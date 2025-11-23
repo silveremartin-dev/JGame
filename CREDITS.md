@@ -86,6 +86,22 @@ This project has been significantly enhanced with artificial intelligence assist
 - License: Public Domain
 - Attribution: Traditional designs
 
+### Checkers Pieces
+- Source: Kenney.nl Board Game Pack
+- License: CC0 1.0 Universal (Public Domain)
+- URL: https://kenney.nl/assets/board-game-pack
+- Attribution: Not required
+- Note: 490 free board game assets including checkers pieces
+
+### Game of the Goose Board
+- Source: Wikimedia Commons + Printable Board Games
+- License: CC0 1.0 Universal / Public Domain
+- URLs: 
+  - https://commons.wikimedia.org/wiki/File:Game_of_the_Goose.svg
+  - https://www.supercoloring.com/printables/goose-game-board
+- Attribution: Not required
+- Note: Traditional Goose game board designs
+
 ## Inspirations and References
 
 ### Game Rules
