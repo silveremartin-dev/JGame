@@ -23,13 +23,3 @@
  *
  * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
-
-/**
- * Attribution Instructions:
- * Byron Knoll: http://code.google.com/p/vector-playing-cards/
- *
- * @since 1.0
- * @version 1.0
- */
-package org.jgame.widgets.cards;
