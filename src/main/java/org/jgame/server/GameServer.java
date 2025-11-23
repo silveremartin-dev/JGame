@@ -24,7 +24,6 @@
  * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
 
-
 package org.jgame.server;
 
 import org.jgame.ui.AboutDialog;
@@ -34,7 +33,6 @@ import org.jgame.ui.ChangeLookAndFeelAction;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
-
 
 import javax.swing.*;
 import java.awt.*;
@@ -49,16 +47,19 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * The server to be used to dispatch packets between clients. Comes with a nice GUI.
- * The server is needed to stored records, serve multi-users games (including the ones against AI players) and single users games.
+ * The server to be used to dispatch packets between clients. Comes with a nice
+ * GUI.
+ * The server is needed to stored records, serve multi-users games (including
+ * the ones against AI players) and single users games.
  *
  * @author Silvere Martin-Michiellot
  * @version 1.0
  */
 
-//options : rankedboards path, server port
-    //start, pause, stop
-    //list aacounts, rankedboards, packets sent per second, solutions/scoress received per second
+// options : rankedboards path, server port
+// start, pause, stop
+// list aacounts, rankedboards, packets sent per second, solutions/scoress
+// received per second
 public class GameServer extends JFrame {
 
     private static final Logger logger = LogManager.getLogger(GameServer.class);
@@ -87,29 +88,30 @@ public class GameServer extends JFrame {
     private DataInputStream dataInputStream;
     private DataOutputStream dataOutputStream;
     private BufferedReader bufferedReader;
-    
-    // UI Components  
+
+    // UI Components
     private JFrame frame;
     private Container contentPane;
     private JPopupMenu popupMenu;
     private ButtonGroup popupMenuGroup;
     private AboutDialog aboutBox;
     private JTextField statusField;
-    
+
     // Application tracking
     private static int numSSs = 0;
     private static List<GameServer> GameServerApplications = new ArrayList<>();
-    
+
     // Configuration
     private static ResourceBundle gameResourceBundle;
     private String serverAddress;
-    
+
     // Look and Feel data
     private static LookAndFeelData[] lookAndFeelData = {
-        new LookAndFeelData("Metal", "javax.swing.plaf.metal.MetalLookAndFeel", "Metal Look and Feel"),
-        new LookAndFeelData("Nimbus", "javax.swing.plaf.nimbus.NimbusLookAndFeel", "Nimbus Look and Feel"),
-        new LookAndFeelData("Windows", "com.sun.java.swing.plaf.windows.WindowsLookAndFeel", "Windows Look and Feel"),
-        new LookAndFeelData("System", UIManager.getSystemLookAndFeelClassName(), "System Look and Feel")
+            new LookAndFeelData("Metal", "javax.swing.plaf.metal.MetalLookAndFeel", "Metal Look and Feel"),
+            new LookAndFeelData("Nimbus", "javax.swing.plaf.nimbus.NimbusLookAndFeel", "Nimbus Look and Feel"),
+            new LookAndFeelData("Windows", "com.sun.java.swing.plaf.windows.WindowsLookAndFeel",
+                    "Windows Look and Feel"),
+            new LookAndFeelData("System", UIManager.getSystemLookAndFeelClassName(), "System Look and Feel")
     };
 
     public GameServer(@NotNull InetAddress serverIP, int serverPort) {
@@ -117,11 +119,12 @@ public class GameServer extends JFrame {
         if ((serverIP != null)) {
             this.serverIP = serverIP;
             this.serverPort = serverPort;
-        } else throw new IllegalArgumentException("serverIP can't be null.");
+        } else
+            throw new IllegalArgumentException("serverIP can't be null.");
     }
 
-   public GameServer(int serverPort) throws UnknownHostException {
-       new GameServer(InetAddress.getByName(getIPAddress()), serverPort);
+    public GameServer(int serverPort) throws UnknownHostException {
+        new GameServer(InetAddress.getByName(getIPAddress()), serverPort);
     }
 
     public GameServer() throws UnknownHostException {
@@ -137,7 +140,7 @@ public class GameServer extends JFrame {
     }
 
     public void start() throws IOException {
-        if (state==STOPPED || state==NOTREADY) {
+        if (state == STOPPED || state == NOTREADY) {
             logger.info("Server starting.");
             serverSocket = new ServerSocket(serverPort);
             socket = serverSocket.accept();
@@ -146,47 +149,52 @@ public class GameServer extends JFrame {
             bufferedReader = new BufferedReader(new InputStreamReader(System.in));
             state = STARTED;
             logger.info("Server started.");
-        } else throw new IllegalStateException("State must be NOTREADY or STOPPED.");
+        } else
+            throw new IllegalStateException("State must be NOTREADY or STOPPED.");
     }
 
     public void play() {
-        if (state==STARTED) {
-        //run in background
-        //create new handle for every known client
-        //send packet to client when asked
-        String str="",str2="";
-        while(!str.equals("stop")){
-            str=dataInputStream.readUTF();
-            System.out.println("client says: "+str);
-            str2=bufferedReader.readLine();
-            dataOutputStream.writeUTF(str2);
-            dataOutputStream.flush();
-        }
-        } else throw new IllegalStateException("State must be STARTED.");
+        if (state == STARTED) {
+            // run in background
+            // create new handle for every known client
+            // send packet to client when asked
+            String str = "", str2 = "";
+            while (!str.equals("stop")) {
+                str = dataInputStream.readUTF();
+                System.out.println("client says: " + str);
+                str2 = bufferedReader.readLine();
+                dataOutputStream.writeUTF(str2);
+                dataOutputStream.flush();
+            }
+        } else
+            throw new IllegalStateException("State must be STARTED.");
     }
 
     public void pause() {
-        if (state==STARTED) {
+        if (state == STARTED) {
             state = PAUSED;
             logger.info("Server paused.");
-        } else throw new IllegalStateException("State must be STARTED.");
+        } else
+            throw new IllegalStateException("State must be STARTED.");
     }
 
     public void stop() throws IOException {
-        if (state==STARTED || state==PAUSED) {
-        dataInputStream.close();
-        socket.close();
-        serverSocket.close();
-        state = STOPPED;
-        logger.info("Server stopped.");
-        } else throw new IllegalStateException("State must be STARTED or PAUSED.");
+        if (state == STARTED || state == PAUSED) {
+            dataInputStream.close();
+            socket.close();
+            serverSocket.close();
+            state = STOPPED;
+            logger.info("Server stopped.");
+        } else
+            throw new IllegalStateException("State must be STARTED or PAUSED.");
     }
 
     public GameUser registerAccount(@NotNull String login, @NotNull String passwordHash) {
         throw new RuntimeException("Not yet implemented.");
     }
 
-    public void changePassword(@NotNull String login, @NotNull String oldPasswordHash, @NotNull String newPasswordHash) {
+    public void changePassword(@NotNull String login, @NotNull String oldPasswordHash,
+            @NotNull String newPasswordHash) {
         throw new RuntimeException("Not yet implemented.");
     }
 
@@ -226,21 +234,20 @@ public class GameServer extends JFrame {
             System.out.println("g is null");
             return;
         }
-        for(int i=0; i<100; i++) {
+        for (int i = 0; i < 100; i++) {
             renderSplashFrame(g, i);
             splash.update();
             try {
                 Thread.sleep(90);
-            }
-            catch(InterruptedException e) {
+            } catch (InterruptedException e) {
             }
         }
         splash.close();
 
-        //addRankedGameBoards
-        //showRankdedBoards
+        // addRankedGameBoards
+        // showRankdedBoards
 
-        //load users database
+        // load users database
 
         GameServer GameServer;
         GameServer = new GameServer(serverAddress, serverPort);
@@ -254,7 +261,8 @@ public class GameServer extends JFrame {
             public void run() {
                 try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+                        | UnsupportedLookAndFeelException ex) {
                     ex.printStackTrace();
                 }
 
@@ -269,12 +277,12 @@ public class GameServer extends JFrame {
     }
 
     static void renderSplashFrame(Graphics2D g, int frame) {
-        final String[] components = {"boards", "users", "server"};
+        final String[] components = { "boards", "users", "server" };
         g.setComposite(AlphaComposite.Clear);
-        g.fillRect(120,140,200,40);
+        g.fillRect(120, 140, 200, 40);
         g.setPaintMode();
         g.setColor(Color.BLACK);
-        g.drawString("Loading "+components[(frame/5)%3]+"...", 120, 150);
+        g.drawString("Loading " + components[(frame / 5) % 3] + "...", 120, 150);
     }
 
     private static final String getIPAddress() {
@@ -291,7 +299,7 @@ public class GameServer extends JFrame {
                 while (addresses.hasMoreElements()) {
                     InetAddress address = addresses.nextElement();
                     ip = address.getHostAddress();
-                    //System.out.println(networkInterface.getDisplayName() + " " + ip);
+                    // System.out.println(networkInterface.getDisplayName() + " " + ip);
                 }
             }
         } catch (SocketException e) {
@@ -329,8 +337,7 @@ public class GameServer extends JFrame {
         fileMenu.addSeparator();
 
         createMenuItem(fileMenu, "Server.FileMenu.exit_label", "Server.FileMenu.exit_mnemonic",
-                "Server.FileMenu.exit_accessible_description", new GameServer.ExitAction(this)
-        );
+                "Server.FileMenu.exit_accessible_description", new GameServer.ExitAction(this));
 
         return menuBar;
     }
@@ -339,10 +346,10 @@ public class GameServer extends JFrame {
      * Create a checkbox menu menu item
      */
     private JMenuItem createCheckBoxMenuItem(JMenu menu, String label,
-                                             String mnemonic,
-                                             String accessibleDescription,
-                                             Action action) {
-        JCheckBoxMenuItem mi = (JCheckBoxMenuItem)menu.add(
+            String mnemonic,
+            String accessibleDescription,
+            Action action) {
+        JCheckBoxMenuItem mi = (JCheckBoxMenuItem) menu.add(
                 new JCheckBoxMenuItem(getString(label)));
         mi.setMnemonic(getMnemonic(mnemonic));
         mi.getAccessibleContext().setAccessibleDescription(getString(
@@ -355,12 +362,12 @@ public class GameServer extends JFrame {
      * Creates a generic menu item
      */
     public JMenuItem createMenuItem(JMenu menu, String label, String mnemonic,
-                                    String accessibleDescription, Action action) {
+            String accessibleDescription, Action action) {
         JMenuItem mi = menu.add(new JMenuItem(getString(label)));
         mi.setMnemonic(getMnemonic(mnemonic));
         mi.getAccessibleContext().setAccessibleDescription(getString(accessibleDescription));
         mi.addActionListener(action);
-        if(action == null) {
+        if (action == null) {
             mi.setEnabled(false);
         }
         return mi;
@@ -407,12 +414,10 @@ public class GameServer extends JFrame {
                 f.getGraphicsConfiguration());
 
         // Make sure we don't place the demo off the screen.
-        int centerWidth = screenRect.width < f.getSize().width ?
-                screenRect.x :
-                screenRect.x + screenRect.width/2 - f.getSize().width/2;
-        int centerHeight = screenRect.height < f.getSize().height ?
-                screenRect.y :
-                screenRect.y + screenRect.height/2 - f.getSize().height/2;
+        int centerWidth = screenRect.width < f.getSize().width ? screenRect.x
+                : screenRect.x + screenRect.width / 2 - f.getSize().width / 2;
+        int centerHeight = screenRect.height < f.getSize().height ? screenRect.y
+                : screenRect.y + screenRect.height / 2 - f.getSize().height / 2;
 
         centerHeight = Math.max(centerHeight, screenInsets.top);
 
@@ -432,7 +437,7 @@ public class GameServer extends JFrame {
     /**
      * Returns the menuBar
      */
-    public JMenuBar getMenuBar() {
+    public JMenuBar getJMenuBar() {
         return menuBar;
     }
 
@@ -441,8 +446,8 @@ public class GameServer extends JFrame {
      * or application
      */
     public Container getContentPane() {
-        if(contentPane == null) {
-            if(getFrame() != null) {
+        if (contentPane == null) {
+            if (getFrame() != null) {
                 contentPane = getFrame().getContentPane();
             }
         }
@@ -491,7 +496,7 @@ public class GameServer extends JFrame {
         } catch (MissingResourceException e) {
             System.out.println("java.util.MissingResourceException: Couldn't find value for: " + key);
         }
-        if(value == null) {
+        if (value == null) {
             value = "Could not find resource: " + key + "  ";
         }
         return value;
@@ -500,10 +505,13 @@ public class GameServer extends JFrame {
     /**
      * Returns a mnemonic from the resource bundle. Typically used as
      * keyboard shortcuts in menu items.
+     * Removed - using static version from TextAndMnemonicUtils
      */
-    public char getMnemonic(String key) {
-        return (getString(key)).charAt(0);
-    }
+    /*
+     * public char getMnemonic(String key) {
+     * return (getString(key)).charAt(0);
+     * }
+     */
 
     /**
      * Creates an icon from an image contained in the "images" directory.
@@ -528,26 +536,26 @@ public class GameServer extends JFrame {
     }
 
     // *******************************************************
-    // **************   ToggleButtonToolbar  *****************
+    // ************** ToggleButtonToolbar *****************
     // *******************************************************
-    static Insets zeroInsets = new Insets(1,1,1,1);
+    static Insets zeroInsets = new Insets(1, 1, 1, 1);
+
     protected static class ToggleButtonToolBar extends JToolBar {
         public ToggleButtonToolBar() {
             super();
             setFloatable(true);
             setRollover(true);
-            //https://stackoverflow.com/questions/19070324/how-to-remove-replace-the-close-button-from-a-floating-jtoolbar
+            // https://stackoverflow.com/questions/19070324/how-to-remove-replace-the-close-button-from-a-floating-jtoolbar
         }
 
         JToggleButton addToggleButton(Action a) {
             JToggleButton tb = new JToggleButton(
-                    (String)a.getValue(Action.NAME),
-                    (Icon)a.getValue(Action.SMALL_ICON)
-            );
+                    (String) a.getValue(Action.NAME),
+                    (Icon) a.getValue(Action.SMALL_ICON));
             tb.setMargin(zeroInsets);
             tb.setText(null);
             tb.setEnabled(a.isEnabled());
-            tb.setToolTipText((String)a.getValue(Action.SHORT_DESCRIPTION));
+            tb.setToolTipText((String) a.getValue(Action.SHORT_DESCRIPTION));
             tb.setAction(a);
             add(tb);
             return tb;
@@ -555,7 +563,7 @@ public class GameServer extends JFrame {
     }
 
     // *******************************************************
-    // *********  ToolBar Panel / Docking Listener ***********
+    // ********* ToolBar Panel / Docking Listener ***********
     // *******************************************************
     static class ToolBarPanel extends JPanel implements ContainerListener {
 
@@ -564,9 +572,8 @@ public class GameServer extends JFrame {
             if (c != null) {
                 Rectangle r = c.getBounds();
                 return (x >= 0) && (x < r.width) && (y >= 0) && (y < r.height);
-            }
-            else {
-                return super.contains(x,y);
+            } else {
+                return super.contains(x, y);
             }
         }
 
@@ -588,7 +595,7 @@ public class GameServer extends JFrame {
     }
 
     // *******************************************************
-    // ******************   Runnables  ***********************
+    // ****************** Runnables ***********************
     // *******************************************************
 
     /**
@@ -612,12 +619,13 @@ public class GameServer extends JFrame {
     }
 
     // *******************************************************
-    // ********************   Actions  ***********************
+    // ******************** Actions ***********************
     // *******************************************************
 
     class ActivatePopupMenuAction extends AbstractAction {
         GameServer GameServerApplication;
         JPopupMenu popup;
+
         protected ActivatePopupMenuAction(GameServer GameServerApplication, JPopupMenu popup) {
             super("ActivatePopupMenu");
             this.GameServerApplication = GameServerApplication;
@@ -634,6 +642,7 @@ public class GameServer extends JFrame {
 
     static class ExitAction extends AbstractAction {
         GameServer GameServerApplication;
+
         protected ExitAction(GameServer GameServerApplication) {
             super("ExitAction");
             this.GameServerApplication = GameServerApplication;
@@ -646,13 +655,14 @@ public class GameServer extends JFrame {
 
     class AboutAction extends AbstractAction {
         GameServer GameServerApplication;
+
         protected AboutAction(GameServer GameServerApplication) {
             super("AboutAction");
             this.GameServerApplication = GameServerApplication;
         }
 
         public void actionPerformed(ActionEvent e) {
-            if(aboutBox == null) {
+            if (aboutBox == null) {
                 aboutBox = new AboutDialog(GameServerApplication);
             }
             aboutBox.pack();
@@ -669,10 +679,23 @@ public class GameServer extends JFrame {
         }
 
         public void run() {
-            SwingUtilities.invokeLater(GameServerApplication::loadModules);
+            SwingUtilities.invokeLater(() -> GameServer.loadModules());
         }
     }
 
+    /**
+     * Gets the input map for key bindings.
+     */
+    public InputMap getInputMap(int condition) {
+        return getRootPane().getInputMap(condition);
+    }
+
+    /**
+     * Gets the action map for actions.
+     */
+    public ActionMap getActionMap() {
+        return getRootPane().getActionMap();
+    }
 
     /**
      * Loads game modules.
@@ -684,6 +707,7 @@ public class GameServer extends JFrame {
 
     /**
      * Gets mnemonic from resource key.
+     * 
      * @param key the resource key
      * @return the mnemonic character code
      */
