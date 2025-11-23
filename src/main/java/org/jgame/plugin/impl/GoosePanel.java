@@ -42,25 +42,6 @@ import java.awt.*;
  * 
  * @author Silvere Martin-Michiellot
  * @version 1.0
- */
-public class GoosePanel extends GamePanel {
-
-    private final GooseRules gooseRules;
-
-    /**
-     * Creates a new Goose panel.
-     * 
-     * @param rules the goose game rules
-     */
-    public GoosePanel(GooseRules rules) {
-        super(rules);
-        this.gooseRules = rules;
-    }
-
-    @Override
-    protected void renderGame(Graphics2D g2d) {
-        // Simple rendering - spiral board with 63 squares
-        int width = getWidth();
         int height = getHeight();
 
         // Draw background

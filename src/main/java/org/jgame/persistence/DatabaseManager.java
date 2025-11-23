@@ -1,53 +1,32 @@
-/*
- * MIT License
- *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
- */
-
 package org.jgame.persistence;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * Manages the H2 database connection and initialization.
+ * Manages the H2 database connection pooling and initialization.
  * 
  * <p>
  * This class handles:
- * - Database connection pooling
+ * - HikariCP connection pooling for high performance
  * - Schema initialization from schema.sql
  * - Connection lifecycle management
+ * - Configurable pool settings from performance.properties
  * </p>
  * 
  * @author Silvere Martin-Michiellot
- * @version 1.0
+ * @version 2.0
  */
 public class DatabaseManager {
 
@@ -56,7 +35,7 @@ public class DatabaseManager {
     private static final String DB_USER = "sa";
     private static final String DB_PASSWORD = "";
 
-    private static Connection connection;
+    private static HikariDataSource dataSource;
     private static boolean initialized = false;
 
     // Prevent instantiation
@@ -65,7 +44,7 @@ public class DatabaseManager {
     }
 
     /**
-     * Initializes the database connection and schema.
+     * Initializes the database connection pool and schema.
      * Safe to call multiple times - will only initialize once.
      * 
      * @throws SQLException if database connection or schema creation fails
@@ -80,19 +59,82 @@ public class DatabaseManager {
             // Load H2 driver
             Class.forName("org.h2.Driver");
 
-            // Establish connection
-            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            LOGGER.info("Database connection established: " + DB_URL);
+            // Load performance properties
+            Properties props = loadPerformanceProperties();
+
+            // Configure HikariCP
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl(DB_URL);
+            config.setUsername(DB_USER);
+            config.setPassword(DB_PASSWORD);
+
+            // Connection pool settings from performance.properties
+            config.setMaximumPoolSize(Integer.parseInt(
+                    props.getProperty("hikaricp.maximumPoolSize", "10")));
+            config.setMinimumIdle(Integer.parseInt(
+                    props.getProperty("hikaricp.minimumIdle", "5")));
+            config.setConnectionTimeout(Long.parseLong(
+                    props.getProperty("hikaricp.connectionTimeout", "30000")));
+            config.setIdleTimeout(Long.parseLong(
+                    props.getProperty("hikaricp.idleTimeout", "600000")));
+            config.setMaxLifetime(Long.parseLong(
+                    props.getProperty("hikaricp.maxLifetime", "1800000")));
+
+            // Pool name for logging
+            config.setPoolName("JGamePool");
+
+            // Performance optimizations
+            config.addDataSourceProperty("cachePrepStmts", "true");
+            config.addDataSourceProperty("prepStmtCacheSize", "250");
+            config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+
+            // Create data source
+            dataSource = new HikariDataSource(config);
+            LOGGER.info("HikariCP pool created: " + config.getPoolName());
 
             // Execute schema
             executeSchema();
 
             initialized = true;
-            LOGGER.info("Database initialized successfully");
+            LOGGER.info("Database initialized successfully with HikariCP");
 
         } catch (ClassNotFoundException e) {
             throw new SQLException("H2 Driver not found", e);
+        } catch (IOException e) {
+            LOGGER.warning("Could not load performance.properties, using defaults");
+            // Initialize with defaults if properties file missing
+            initializeWithDefaults();
         }
+    }
+
+    /**
+     * Loads performance properties from file.
+     */
+    private static Properties loadPerformanceProperties() throws IOException {
+        Properties props = new Properties();
+        try (InputStream is = DatabaseManager.class.getResourceAsStream("/performance.properties")) {
+            if (is != null) {
+                props.load(is);
+            }
+        }
+        return props;
+    }
+
+    /**
+     * Initialize with default settings if properties file not found.
+     */
+    private static void initializeWithDefaults() throws SQLException {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(DB_URL);
+        config.setUsername(DB_USER);
+        config.setPassword(DB_PASSWORD);
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(5);
+        config.setPoolName("JGamePool");
+
+        dataSource = new HikariDataSource(config);
+        executeSchema();
+        initialized = true;
     }
 
     /**
@@ -108,7 +150,8 @@ public class DatabaseManager {
                     .lines()
                     .collect(Collectors.joining("\n"));
 
-            try (Statement stmt = connection.createStatement()) {
+            try (Connection conn = dataSource.getConnection();
+                    Statement stmt = conn.createStatement()) {
                 for (String sql : schema.split(";")) {
                     sql = sql.trim();
                     if (!sql.isEmpty() && !sql.startsWith("--")) {
@@ -125,10 +168,10 @@ public class DatabaseManager {
     }
 
     /**
-     * Gets the database connection.
+     * Gets a database connection from the pool.
      * Initializes the database if not already done.
      * 
-     * @return active database connection
+     * @return pooled database connection
      * @throws SQLException if connection cannot be established
      */
     public static Connection getConnection() throws SQLException {
@@ -136,26 +179,22 @@ public class DatabaseManager {
             initialize();
         }
 
-        if (connection == null || connection.isClosed()) {
-            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        if (dataSource == null || dataSource.isClosed()) {
+            throw new SQLException("DataSource is not available");
         }
 
-        return connection;
+        return dataSource.getConnection();
     }
 
     /**
-     * Closes the database connection.
+     * Closes the connection pool and releases all resources.
      * Should be called on application shutdown.
      */
     public static synchronized void shutdown() {
-        if (connection != null) {
-            try {
-                connection.close();
-                initialized = false;
-                LOGGER.info("Database connection closed");
-            } catch (SQLException e) {
-                LOGGER.severe("Error closing database connection: " + e.getMessage());
-            }
+        if (dataSource != null && !dataSource.isClosed()) {
+            dataSource.close();
+            initialized = false;
+            LOGGER.info("HikariCP pool closed");
         }
     }
 
@@ -165,6 +204,22 @@ public class DatabaseManager {
      * @return true if initialized, false otherwise
      */
     public static boolean isInitialized() {
-        return initialized;
+        return initialized && dataSource != null && !dataSource.isClosed();
+    }
+
+    /**
+     * Gets pool statistics for monitoring.
+     * 
+     * @return formatted pool statistics string
+     */
+    public static String getPoolStats() {
+        if (dataSource != null && !dataSource.isClosed()) {
+            return String.format("Pool[active=%d, idle=%d, total=%d, waiting=%d]",
+                    dataSource.getHikariPoolMXBean().getActiveConnections(),
+                    dataSource.getHikariPoolMXBean().getIdleConnections(),
+                    dataSource.getHikariPoolMXBean().getTotalConnections(),
+                    dataSource.getHikariPoolMXBean().getThreadsAwaitingConnection());
+        }
+        return "Pool[not initialized]";
     }
 }
