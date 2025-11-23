@@ -24,7 +24,6 @@
  * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
 
-
 package org.jgame.parts.players;
 
 import org.jetbrains.annotations.NotNull;
@@ -47,10 +46,10 @@ public abstract class AbstractPlayer implements PlayerInterface {
 
     private ScoreInterface score;
 
-    //or level, usable also for team members
+    // or level, usable also for team members
     private int rank;
 
-    //may be we should also implement a role if in a team
+    // may be we should also implement a role if in a team
 
     @Override
     public String getId() {
@@ -58,7 +57,7 @@ public abstract class AbstractPlayer implements PlayerInterface {
     }
 
     public void setId(@NotNull String name) {
-        this.id = id;
+        this.id = name;
     }
 
     @Override
@@ -104,10 +103,14 @@ public abstract class AbstractPlayer implements PlayerInterface {
         this.score = score;
     }
 
-    public int getRank() { return rank; }
+    public int getRank() {
+        return rank;
+    }
 
-    public void setRank(int rank) { this.rank = rank; }
+    public void setRank(int rank) {
+        this.rank = rank;
+    }
 
-    //use user interface to convert inputs into actions
+    // use user interface to convert inputs into actions
 
 }

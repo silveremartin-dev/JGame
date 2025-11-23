@@ -24,35 +24,20 @@
  * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
 
-package org.jgame.util;
+package org.jgame.logic.games.goose;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import org.jgame.parts.tiles.AbstractSquareTile;
 
-public class RandomGenerator {
+/**
+ * Concrete implementation of a square tile for the Game of the Goose.
+ * Each square on the Goose board is represented by this tile type.
+ */
+public class GooseSquareTile extends AbstractSquareTile {
 
-    private static final Random random = new Random();
-
-    private RandomGenerator() {
-        // Utility class, prevent instantiation
+    /**
+     * Default constructor for GooseSquareTile.
+     */
+    public GooseSquareTile() {
+        // Default construction
     }
-
-    public static int rollDice(int faces) {
-        return random.nextInt(faces) + 1;
-    }
-
-    public static List<Integer> rollDices(int faces, int numberOfDices) {
-        List<Integer> resultList;
-        resultList = new ArrayList<>();
-        for (int i = 0; i < numberOfDices; i++) {
-            resultList.add(random.nextInt(faces) + 1);
-        }
-        return resultList;
-    }
-
-    public static boolean flipCoin() {
-        return random.nextBoolean();
-    }
-
 }
