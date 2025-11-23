@@ -44,9 +44,20 @@ CREATE TABLE IF NOT EXISTS scores (
 );
 
 -- Indexes for better performance
-CREATE INDEX IF NOT EXISTS idx_games_type ON games(game_type);
-CREATE INDEX IF NOT EXISTS idx_games_finished ON games(is_finished);
-CREATE INDEX IF NOT EXISTS idx_game_players_game ON game_players(game_id);
-CREATE INDEX IF NOT EXISTS idx_game_players_user ON game_players(user_id);
-CREATE INDEX IF NOT EXISTS idx_scores_user ON scores(user_id);
-CREATE INDEX IF NOT EXISTS idx_scores_game ON scores(game_id);
+DROP INDEX IF EXISTS idx_games_type;
+CREATE INDEX idx_games_type ON games(game_type);
+
+DROP INDEX IF EXISTS idx_games_finished;
+CREATE INDEX idx_games_finished ON games(is_finished);
+
+DROP INDEX IF EXISTS idx_game_players_game;
+CREATE INDEX idx_game_players_game ON game_players(game_id);
+
+DROP INDEX IF EXISTS idx_game_players_user;
+CREATE INDEX idx_game_players_user ON game_players(user_id);
+
+DROP INDEX IF EXISTS idx_scores_user;
+CREATE INDEX idx_scores_user ON scores(user_id);
+
+DROP INDEX IF EXISTS idx_scores_game;
+CREATE INDEX idx_scores_game ON scores(game_id);
