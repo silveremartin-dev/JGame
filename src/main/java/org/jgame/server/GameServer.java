@@ -29,6 +29,8 @@ package org.jgame.server;
 import org.jgame.ui.AboutDialog;
 import org.jgame.ui.LookAndFeelData;
 import org.jgame.ui.ChangeLookAndFeelAction;
+import org.jgame.ui.TestPane;
+import org.jgame.util.TextAndMnemonicUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,7 +155,7 @@ public class GameServer extends JFrame {
             throw new IllegalStateException("State must be NOTREADY or STOPPED.");
     }
 
-    public void play() {
+    public void play() throws IOException {
         if (state == STARTED) {
             // run in background
             // create new handle for every known client
@@ -250,7 +252,11 @@ public class GameServer extends JFrame {
         // load users database
 
         GameServer GameServer;
-        GameServer = new GameServer(serverAddress, serverPort);
+        try {
+            GameServer = new GameServer(InetAddress.getByName(serverAddress), serverPort);
+        } catch (UnknownHostException ex) {
+            throw new RuntimeException("Invalid server address", ex);
+        }
         GameServer.pack();
         GameServer.setVisible(true);
         setVisible(true);
@@ -339,7 +345,7 @@ public class GameServer extends JFrame {
         createMenuItem(fileMenu, "Server.FileMenu.exit_label", "Server.FileMenu.exit_mnemonic",
                 "Server.FileMenu.exit_accessible_description", new GameServer.ExitAction(this));
 
-        return menuBar;
+        return (JMenuBar) super.getJMenuBar();
     }
 
     /**
@@ -398,7 +404,7 @@ public class GameServer extends JFrame {
         popupMenuGroup.add(mi);
         mi.setMnemonic(lafData.mnemonic);
         mi.getAccessibleContext().setAccessibleDescription(lafData.accDescription);
-        mi.addActionListener(new ChangeLookAndFeelAction(this, lafData));
+        mi.addActionListener(new ChangeLookAndFeelAction((JFrame) this, lafData));
         return mi;
     }
 
@@ -438,7 +444,7 @@ public class GameServer extends JFrame {
      * Returns the menuBar
      */
     public JMenuBar getJMenuBar() {
-        return menuBar;
+        return (JMenuBar) super.getJMenuBar();
     }
 
     /**
