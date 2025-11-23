@@ -27,6 +27,14 @@
 
 package org.jgame.server;
 
+import org.jgame.ui.AboutDialog;
+import org.jgame.ui.LookAndFeelData;
+import org.jgame.ui.ChangeLookAndFeelAction;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -78,7 +86,30 @@ public class GameServer extends JFrame {
     private Socket socket;
     private DataInputStream dataInputStream;
     private DataOutputStream dataOutputStream;
-    private BufferedReader bufferedReader;
+    
+    // UI Components  
+    private JFrame frame;
+    private Container contentPane;
+    private JPopupMenu popupMenu;
+    private ButtonGroup popupMenuGroup;
+    private AboutDialog aboutBox;
+    private JTextField statusField;
+    
+    // Application tracking
+    private static int numSSs = 0;
+    private static List<GameServer> GameServerApplications = new ArrayList<>();
+    
+    // Configuration
+    private static ResourceBundle gameResourceBundle;
+    private String serverAddress;
+    
+    // Look and Feel data
+    private static LookAndFeelData[] lookAndFeelData = {
+        new LookAndFeelData("Metal", "javax.swing.plaf.metal.MetalLookAndFeel", "Metal Look and Feel"),
+        new LookAndFeelData("Nimbus", "javax.swing.plaf.nimbus.NimbusLookAndFeel", "Nimbus Look and Feel"),
+        new LookAndFeelData("Windows", "com.sun.java.swing.plaf.windows.WindowsLookAndFeel", "Windows Look and Feel"),
+        new LookAndFeelData("System", UIManager.getSystemLookAndFeelClassName(), "System Look and Feel")
+    };
 
     public GameServer(@NotNull InetAddress serverIP, int serverPort) {
         state = NOTREADY;

@@ -107,4 +107,14 @@ public class TextAndMnemonicUtils {
             component.setMnemonic(mnemonic);
         }
     }
+    
+    /**
+     * Gets text and mnemonic string (alias for getString).
+     *
+     * @param key the resource key  
+     * @return the localized string
+     */
+    public static String getTextAndMnemonicString(String key) {
+        return getString(key);
+    }
 }
