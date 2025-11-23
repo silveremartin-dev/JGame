@@ -24,22 +24,6 @@
  * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
 
-package org.jgame.server;
-
-import org.jgame.ui.AboutDialog;
-import org.jgame.ui.LookAndFeelData;
-import org.jgame.ui.ChangeLookAndFeelAction;
-import org.jgame.ui.TestPane;
-import org.jgame.util.TextAndMnemonicUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
 import java.net.*;
 import java.util.Enumeration;
 import java.util.MissingResourceException;

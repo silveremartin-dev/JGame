@@ -26,43 +26,172 @@
 
 package org.jgame.util;
 
+import org.mindrot.jbcrypt.BCrypt;
+
+import java.util.logging.Logger;
+
 /**
- * Singleton for password encoding/hashing.
- * Uses BCrypt for secure password hashing.
- * TODO: Implement actual BCrypt hashing (requires adding dependency)
- *
+ * Singleton class for secure password encoding and verification using BCrypt.
+ * 
+ * <p>
+ * BCrypt is a password hashing function designed to be slow and computationally
+ * expensive,
+ * which helps protect against brute-force attacks. It automatically handles
+ * salt generation
+ * and incorporates it into the hash.
+ * </p>
+ * 
+ * <p>
+ * <strong>Security Features:</strong>
+ * </p>
+ * <ul>
+ * <li>Automatic salt generation per password</li>
+ * <li>Configurable work factor (log rounds)</li>
+ * <li>Resistance to rainbow table attacks</li>
+ * <li>Slow hashing to prevent brute force</li>
+ * </ul>
+ * 
  * @author Silvere Martin-Michiellot
- * @version 1.0
+ * @version 2.0
  */
-public class PasswordEncoderSingleton {
+public final class PasswordEncoderSingleton {
 
+    private static final Logger LOGGER = Logger.getLogger(PasswordEncoderSingleton.class.getName());
+
+    /**
+     * BCrypt work factor (log rounds).
+     * Higher values = more secure but slower.
+     * 12 is a good balance as of 2025.
+     */
+    private static final int LOG_ROUNDS = 12;
+
+    /**
+     * Minimum password length for validation.
+     */
+    private static final int MIN_PASSWORD_LENGTH = 8;
+
+    /**
+     * Maximum password length to prevent DoS attacks.
+     * BCrypt has a 72-byte limit, but we use 100 for user convenience.
+     */
+    private static final int MAX_PASSWORD_LENGTH = 100;
+
+    // Prevent instantiation
     private PasswordEncoderSingleton() {
-        // Private constructor for singleton
+        throw new UnsupportedOperationException("Utility class - cannot be instantiated");
     }
 
     /**
-     * Hashes a plaintext password.
-     * TODO: Implement BCrypt hashing
-     *
-     * @param plaintext the plaintext password
-     * @return the hashed password
+     * Encodes a plaintext password using BCrypt.
+     * 
+     * @param password the plaintext password to encode
+     * @return BCrypt hash of the password
+     * @throws IllegalArgumentException if password is null, empty, or invalid
+     *                                  length
+     * @throws IllegalStateException    if BCrypt hashing fails
      */
-    public static String hashPassword(String plaintext) {
-        // TODO: Implement BCrypt hashing
-        // For now, just throw exception
-        throw new UnsupportedOperationException("Password hashing not yet implemented - add BCrypt dependency");
+    public static String encode(String password) {
+        validatePassword(password);
+
+        try {
+            String hash = BCrypt.hashpw(password, BCrypt.gensalt(LOG_ROUNDS));
+            LOGGER.fine("Password encoded successfully");
+            return hash;
+        } catch (Exception e) {
+            LOGGER.severe("Failed to encode password: " + e.getMessage());
+            throw new IllegalStateException("Password encoding failed", e);
+        }
     }
 
     /**
-     * Verifies a plaintext password against a hash.
-     * TODO: Implement BCrypt verification
-     *
-     * @param plaintext the plaintext password
-     * @param hashed    the hashed password
-     * @return true if password matches
+     * Verifies if a plaintext password matches a BCrypt hash.
+     * 
+     * @param password       the plaintext password to verify
+     * @param hashedPassword the BCrypt hash to verify against
+     * @return true if password matches, false otherwise
+     * @throws IllegalArgumentException if either parameter is null or empty
      */
-    public static boolean checkPassword(String plaintext, String hashed) {
-        // TODO: Implement BCrypt verification
-        throw new UnsupportedOperationException("Password verification not yet implemented - add BCrypt dependency");
+    public static boolean matches(String password, String hashedPassword) {
+        if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
+        }
+        if (hashedPassword == null || hashedPassword.isEmpty()) {
+            throw new IllegalArgumentException("Hashed password cannot be null or empty");
+        }
+
+        try {
+            boolean result = BCrypt.checkpw(password, hashedPassword);
+            LOGGER.fine("Password verification: " + (result ? "SUCCESS" : "FAILED"));
+            return result;
+        } catch (Exception e) {
+            LOGGER.warning("Password verification failed: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Validates password strength and format.
+     * 
+     * @param password the password to validate
+     * @throws IllegalArgumentException if password is invalid
+     */
+    private static void validatePassword(String password) {
+        if (password == null) {
+            throw new IllegalArgumentException("Password cannot be null");
+        }
+        if (password.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+        if (password.length() < MIN_PASSWORD_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Password must be at least " + MIN_PASSWORD_LENGTH + " characters");
+        }
+        if (password.length() > MAX_PASSWORD_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Password must not exceed " + MAX_PASSWORD_LENGTH + " characters");
+        }
+    }
+
+    /**
+     * Checks if a password meets minimum strength requirements.
+     * 
+     * @param password the password to check
+     * @return true if password is strong enough, false otherwise
+     */
+    public static boolean isStrongPassword(String password) {
+        if (password == null || password.length() < MIN_PASSWORD_LENGTH) {
+            return false;
+        }
+
+        boolean hasUpper = false;
+        boolean hasLower = false;
+        boolean hasDigit = false;
+        boolean hasSpecial = false;
+
+        for (char c : password.toCharArray()) {
+            if (Character.isUpperCase(c))
+                hasUpper = true;
+            else if (Character.isLowerCase(c))
+                hasLower = true;
+            else if (Character.isDigit(c))
+                hasDigit = true;
+            else
+                hasSpecial = true;
+        }
+
+        // Require at least 3 of 4 character types
+        int typeCount = (hasUpper ? 1 : 0) + (hasLower ? 1 : 0) +
+                (hasDigit ? 1 : 0) + (hasSpecial ? 1 : 0);
+
+        return typeCount >= 3;
+    }
+
+    /**
+     * Gets the current BCrypt work factor.
+     * 
+     * @return log rounds value
+     */
+    public static int getLogRounds() {
+        return LOG_ROUNDS;
     }
 }
