@@ -29,7 +29,7 @@ package org.jgame.logic.games.goose;
 import org.jgame.logic.AbstractRuleset;
 import org.jgame.logic.ActionInterface;
 import org.jgame.logic.Gameplay;
-import org.jgame.logic.scores.ValueScore;
+import org.jgame.logic.scores.DoubleScore;
 import org.jgame.parts.PlayerInterface;
 import org.jgame.parts.boards.AbstractLineBoard;
 import org.jgame.parts.players.AbstractPlayer;
@@ -121,7 +121,7 @@ public class GooseRules extends AbstractRuleset {
                 currentPlayer.setType(AbstractPlayer.BIOLOGICAL);
                 currentPlayer.setId();
                 currentPlayer.setState(PlayerInterface.START_STATE);
-                currentPlayer.setScore(new ValueScore(1));
+                currentPlayer.setScore(new DoubleScore(1));
                 // TODO: Set initial position properly once board node structure is finalized
                 // currentPlayer.setPosition(board.getNodes().get(i).getPosition());
                 resultPlayers.add(currentPlayer);
@@ -269,7 +269,7 @@ public class GooseRules extends AbstractRuleset {
              */
 
             // player.setPosition(newPosition);
-            // player.setScore(new ValueScore(newPosition));
+            // player.setScore(new DoubleScore(newPosition));
         } else {
             if (inGameState[turnIndex] == LOSE_ONE_TURN) {
                 inGameState[turnIndex] = CAN_MOVE;
@@ -337,3 +337,4 @@ public class GooseRules extends AbstractRuleset {
     }
 
 }
+
