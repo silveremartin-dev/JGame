@@ -54,10 +54,10 @@ public class GameServer extends JFrame {
     private final static int PAUSED = 2;
 
     private static final String ServerCommandRegister = "REGISTER";
-    private static final String ServerCommandRegister = "LOGIN";
+    private static final String ServerCommandLogin = "LOGIN";
     private static final String ServerCommandDeleteAccount = "DELETEACCOUNT";
-    private static final String ServerCommandRegister = "LOGOUT";
-    private static final String ServerCommandRegister = "GETRANKED";
+    private static final String ServerCommandLogout = "LOGOUT";
+    private static final String ServerCommandGetRanked = "GETRANKED";
 
     private int state;
 
@@ -66,7 +66,7 @@ public class GameServer extends JFrame {
     private ServerSocket serverSocket;
     private Socket socket;
     private DataInputStream dataInputStream;
-    private DataOutputStream dataOutputStream);
+    private DataOutputStream dataOutputStream;
     private BufferedReader bufferedReader;
 
     public GameServer(@NotNull InetAddress serverIP, int serverPort) {

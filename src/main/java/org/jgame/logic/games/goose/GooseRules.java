@@ -1,17 +1,27 @@
 /*
- * Copyright 2022 Silvere Martin-Michiellot
+ * MIT License
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
 
 package org.jgame.logic.games.goose;
@@ -28,6 +38,7 @@ import org.jgame.util.Graph;
 import org.jgame.util.RandomGenerator;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -38,17 +49,31 @@ public class GooseRules extends AbstractRuleset {
     // https://www.supercoloring.com/paper-crafts/vintage-board-game-of-the-goose
     // Rules of the game :
 
-    // This game uses two dice. Each player must have a separate mark to clearly mark the place where the points obtained have brought him. The players set the fines to be paid for the various accidents and place a bet.
-    //  Each throws the dice in turn, then counts, on the board, as many squares as points brought and places his mark on the last of these points.
-    // The first to reach number 63 wins the game and collects the amount of stakes and fines. If you exceed this number, you double the point by retracing your steps.
-    // Any player whose dice land on one of the geese placed 9 by 9, doubles his point until he encounters no more.
-    // If from the first throw of the dice, we roll 9, by 6 and 3 we will place ourselves at n° 26, or by 5 and 4 at 53. If from the first throw of the dice, we bring 6, where there is a bridge, we will be placed at number 12.
-    // Accidents – Whoever gets to No. 19, Inn, pays the fine and stays there until the other players have each played twice.
-    // Whoever arrives at number 31, where there is a well, pays the fine and stays there until another player, arriving at the same number, takes him out: he then takes the place that this player just quit.
+    // This game uses two dice. Each player must have a separate mark to clearly
+    // mark the place where the points obtained have brought him. The players set
+    // the fines to be paid for the various accidents and place a bet.
+    // Each throws the dice in turn, then counts, on the board, as many squares as
+    // points brought and places his mark on the last of these points.
+    // The first to reach number 63 wins the game and collects the amount of stakes
+    // and fines. If you exceed this number, you double the point by retracing your
+    // steps.
+    // Any player whose dice land on one of the geese placed 9 by 9, doubles his
+    // point until he encounters no more.
+    // If from the first throw of the dice, we roll 9, by 6 and 3 we will place
+    // ourselves at n° 26, or by 5 and 4 at 53. If from the first throw of the dice,
+    // we bring 6, where there is a bridge, we will be placed at number 12.
+    // Accidents – Whoever gets to No. 19, Inn, pays the fine and stays there until
+    // the other players have each played twice.
+    // Whoever arrives at number 31, where there is a well, pays the fine and stays
+    // there until another player, arriving at the same number, takes him out: he
+    // then takes the place that this player just quit.
     // Whoever arrives at No. 42, labyrinth, pays the fine and returns to No. 30.
-    // Anyone who arrives at number 52, the prison, pays the fine and stays there until someone else takes him out; he then takes the place occupied by the latter player.
+    // Anyone who arrives at number 52, the prison, pays the fine and stays there
+    // until someone else takes him out; he then takes the place occupied by the
+    // latter player.
     // Whoever gets to death at number 58 pays the fine and restarts the game.
-    // Any player met by another pays the fine and takes the place that the latter has just left.
+    // Any player met by another pays the fine and takes the place that the latter
+    // has just left.
 
     public static final int CAN_MOVE = 2;
     public static final int LOSE_ONE_TURN = 4;
@@ -67,7 +92,7 @@ public class GooseRules extends AbstractRuleset {
 
     private int turnIndex;
 
-    //does nothing, call initGame to actually prepare the game
+    // does nothing, call initGame to actually prepare the game
     public GooseRules() {
     }
 
@@ -80,7 +105,7 @@ public class GooseRules extends AbstractRuleset {
         return board;
     }
 
-    //number of players expected between 2 to 10
+    // number of players expected between 2 to 10
     private Set<AbstractPlayer> generatePlayers(int numPlayers) {
         if (numPlayers > 1 && numPlayers < 11) {
             Set<AbstractPlayer> resultPlayers;
@@ -92,17 +117,19 @@ public class GooseRules extends AbstractRuleset {
                     public List<ActionInterface> computeNextActions(Gameplay gameplay) {
                         return null;
                     }
-                }xxxx
+                };
                 currentPlayer.setType(AbstractPlayer.BIOLOGICAL);
-                currentPlayer.setId();xxxx
+                currentPlayer.setId();
                 currentPlayer.setState(PlayerInterface.START_STATE);
                 currentPlayer.setScore(new ValueScore(1));
-                currentPlayer.setPosition(board.getNodes().get(i).);xxxx
+                // TODO: Set initial position properly once board node structure is finalized
+                // currentPlayer.setPosition(board.getNodes().get(i).getPosition());
                 resultPlayers.add(currentPlayer);
             }
-            players = resultPlayers;
+            players = new ArrayList<>(resultPlayers);
             return resultPlayers;
-        } else throw new IllegalArgumentException("Number of players expected to be between 2 and 10.");
+        } else
+            throw new IllegalArgumentException("Number of players expected to be between 2 and 10.");
     }
 
     public List<AbstractPlayer> getPlayers() {
@@ -155,10 +182,11 @@ public class GooseRules extends AbstractRuleset {
         return turnIndex;
     }
 
-    public void initGame(int numPlayers) throws InvocationTargetException, InstantiationException, IllegalAccessException {
+    public void initGame(int numPlayers)
+            throws InvocationTargetException, InstantiationException, IllegalAccessException {
         generateBoard();
         generatePlayers(numPlayers);
-        getPlayOrder();
+        generatePlayOrder();
         generateInGameState();
     }
 
@@ -174,31 +202,81 @@ public class GooseRules extends AbstractRuleset {
         player.setState(PlayerInterface.HAS_QUIT_STATE);
     }
 
-    //TODO
-    public void nextTurn () {
+    /**
+     * Process the next turn in the game.
+     * TODO: Complete implementation of game rules
+     * - Handle player collision (player meeting another player)
+     * - Implement first turn special rules (positions 6 and 9)
+     * - Implement special tiles (inn, well, labyrinth, prison, death, geese)
+     * - Handle position overflow (bounce back from 63)
+     */
+    public void nextTurn() {
         AbstractPlayer currentPlayer;
         currentPlayer = players.get(turnIndex);
-        if (inGameState[turnIndex]==CAN_MOVE) {
-            gamenewPostiion = player.position + rollTwoDices();
-            switch(newPosition) {
-                if otherplayer.position = newPosition otherPlayer.position = oldPosition
-                case 9 : if player.firstturn : if firstdice = 5 || firstdice = 4 newPosition = 53 else newPosition = 26
-                case 6 : if player.firstturn newPosition = 12; break;
-                case 19 : player.state = LOSE_ONE_TURN; break;
-                case 31: player.state = NO_MOVE; if other.player.position =31 otherplayer.state = canmove; break;
-                case 52: player.state = NO_MOVE; if other.player.position =52 otherplayer.state = canmove; break;
-                case 42 : newpostion = 30
-                        case58: newPosition = 1
-            case (9,18,27,36,45, 54): rollTwo6Dices(); break;
-                case 63: player.STATE = WINNER; endGame();break;
-        case > 63:
-                    newPosition = 63
+        if (inGameState[turnIndex] == CAN_MOVE) {
+            // TODO: Implement complete game logic
+            // Roll dice and move player
+            List<Integer> diceRoll = rollTwo6Dices();
+            int diceSum = diceRoll.get(0) + diceRoll.get(1);
+
+            // Placeholder implementation - needs completion
+            /*
+             * int newPosition = player.position + diceSum;
+             * 
+             * switch(newPosition) {
+             * case 6: // Bridge - first turn only
+             * if (player.firstTurn) newPosition = 12;
+             * break;
+             * case 9: // Goose - first turn special
+             * if (player.firstTurn) {
+             * if (diceRoll.get(0) == 5 || diceRoll.get(0) == 4) {
+             * newPosition = 53;
+             * } else {
+             * newPosition = 26;
+             * }
+             * }
+             * break;
+             * case 19: // Inn
+             * inGameState[turnIndex] = LOSE_ONE_TURN;
+             * break;
+             * case 31: // Well
+             * case 52: // Prison
+             * inGameState[turnIndex] = NO_MOVE;
+             * // TODO: Handle release by another player
+             * break;
+             * case 42: // Labyrinth
+             * newPosition = 30;
+             * break;
+             * case 58: // Death
+             * newPosition = 1;
+             * break;
+             * case 63: // Winner
+             * inGameState[turnIndex] = WINNER;
+             * endGame();
+             * break;
+             * default:
+             * if (newPosition > 63) {
+             * // Bounce back
+             * newPosition = 63 - (newPosition - 63);
+             * }
+             * // Check for goose tiles (9, 18, 27, 36, 45, 54)
+             * if (newPosition % 9 == 0 && newPosition != 63) {
+             * // Double the dice roll
+             * newPosition += diceSum;
+             * }
+             * break;
+             * }
+             */
+
+            // player.setPosition(newPosition);
+            // player.setScore(new ValueScore(newPosition));
         } else {
-                if (inGameState[turnIndex]==LOSE_ONE_TURN) {
-                    inGameState[turnIndex]==CAN_MOVE;
-                }
+            if (inGameState[turnIndex] == LOSE_ONE_TURN) {
+                inGameState[turnIndex] = CAN_MOVE;
             }
-        player.setScore(player.getScore().setScoreValue(player.getPosition()));
+        }
+
+        // Move to next player
         turnIndex++;
         if (turnIndex == players.size()) {
             turnIndex = 0;
@@ -206,33 +284,38 @@ public class GooseRules extends AbstractRuleset {
         }
     }
 
-    public move(PlayerInterface player, oldPosition newPosition) {
-        playerPiece.display()
+    /**
+     * Move a player piece on the board.
+     * TODO: Implement visual representation and animation
+     */
+    public void move(PlayerInterface player, int oldPosition, int newPosition) {
+        // TODO: Implement piece movement and display
+        // playerPiece.display();
     }
 
     public void endGame() {
         AbstractPlayer currentPlayer;
         for (int i = 0; i < players.size(); i++) {
             currentPlayer = players.get(i);
-            if (currentPlayer.getState()!=PlayerInterface.HAS_QUIT_STATE) {
+            if (currentPlayer.getState() != PlayerInterface.HAS_QUIT_STATE) {
                 currentPlayer.setState(PlayerInterface.END_STATE);
             }
         }
     }
 
-    //return ths players index from the best to the last
-    //duplicate index means equivalent score
-    //last may mean : did not attend, did not finish, lowest score
+    // return the players index from the best to the last
+    // duplicate index means equivalent score
+    // last may mean : did not attend, did not finish, lowest score
     public int[] getPlayersRank() {
         double[] playersScore;
         playersScore = new double[players.size()];
         for (int i = 0; i < players.size(); i++) {
-            playersScore[i] = ((Double)players.get(i).getScore().getScoreValue()).doubleValue();
+            playersScore[i] = ((Double) players.get(i).getScore().getScoreValue()).doubleValue();
         }
         return getRanksArray(playersScore);
     }
 
-    //https://stackoverflow.com/questions/36313032/how-to-rank-an-array-according-to-values-of-the-array-in-java
+    // https://stackoverflow.com/questions/36313032/how-to-rank-an-array-according-to-values-of-the-array-in-java
     private static int[] getRanksArray(double[] array) {
         int[] result;
         int count;

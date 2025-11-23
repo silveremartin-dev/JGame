@@ -125,11 +125,13 @@ public class GameClient extends JFrame {
     }
 
     public GameUser registerAccount() {
-        PasswordEncoderSingleton.hashPassword()
+        // TODO: Implement account registration
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     public GameUser changePassword() {
-        PasswordEncoderSingleton.hashPassword()
+        // TODO: Implement password change
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     public void deleteAccount() {
@@ -169,9 +171,7 @@ public class GameClient extends JFrame {
 
         logger.info("Client starting.");
 
-        //choose solver
-        BasicGameSolver
-                AdvancedGameSolver
+        // TODO: Choose solver (BasicGameSolver vs AdvancedGameSolver)
 
         if (cmd.hasOption("ng")) {
             GameNoGUI GameNoGUI;
