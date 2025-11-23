@@ -76,7 +76,7 @@ public sealed interface ChessPiece
 /**
  * Pawn piece.
  */
-record Pawn(ChessPiece.Color color) implements ChessPiece {
+public record Pawn(ChessPiece.Color color) implements ChessPiece {
     @Override
     public char getSymbol() {
         return 'P';
@@ -96,7 +96,7 @@ record Pawn(ChessPiece.Color color) implements ChessPiece {
 /**
  * Knight piece.
  */
-record Knight(ChessPiece.Color color) implements ChessPiece {
+public record Knight(ChessPiece.Color color) implements ChessPiece {
     @Override
     public char getSymbol() {
         return 'N';
@@ -116,7 +116,7 @@ record Knight(ChessPiece.Color color) implements ChessPiece {
 /**
  * Bishop piece.
  */
-record Bishop(ChessPiece.Color color) implements ChessPiece {
+public record Bishop(ChessPiece.Color color) implements ChessPiece {
     @Override
     public char getSymbol() {
         return 'B';
@@ -136,7 +136,7 @@ record Bishop(ChessPiece.Color color) implements ChessPiece {
 /**
  * Rook piece.
  */
-record Rook(ChessPiece.Color color) implements ChessPiece {
+public record Rook(ChessPiece.Color color) implements ChessPiece {
     @Override
     public char getSymbol() {
         return 'R';
@@ -156,7 +156,7 @@ record Rook(ChessPiece.Color color) implements ChessPiece {
 /**
  * Queen piece.
  */
-record Queen(ChessPiece.Color color) implements ChessPiece {
+public record Queen(ChessPiece.Color color) implements ChessPiece {
     @Override
     public char getSymbol() {
         return 'Q';
@@ -176,7 +176,7 @@ record Queen(ChessPiece.Color color) implements ChessPiece {
 /**
  * King piece.
  */
-record King(ChessPiece.Color color) implements ChessPiece {
+public record King(ChessPiece.Color color) implements ChessPiece {
     @Override
     public char getSymbol() {
         return 'K';
