@@ -86,6 +86,7 @@ public class GameServer extends JFrame {
     private Socket socket;
     private DataInputStream dataInputStream;
     private DataOutputStream dataOutputStream;
+    private BufferedReader bufferedReader;
     
     // UI Components  
     private JFrame frame;
@@ -672,4 +673,21 @@ public class GameServer extends JFrame {
         }
     }
 
+
+    /**
+     * Loads game modules.
+     * TODO: Implement module loading functionality
+     */
+    public static void loadModules() {
+        // TODO: Implement module loading
+    }
+
+    /**
+     * Gets mnemonic from resource key.
+     * @param key the resource key
+     * @return the mnemonic character code
+     */
+    public static int getMnemonic(String key) {
+        return TextAndMnemonicUtils.getMnemonic(key);
+    }
 }
