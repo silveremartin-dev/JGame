@@ -59,6 +59,13 @@ public class GameUser {
         } else throw new IllegalArgumentException("You cannot set a null login or null password.");
     }
 
+    /**
+     * Default constructor for testing/demo purposes.
+     */
+    public GameUser() {
+        this("guest", "guest");
+    }
+
     public String getLogin() {
         return login;
     }
