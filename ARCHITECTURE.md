@@ -220,18 +220,6 @@ java -jar jgame-client.jar --server=game.example.com:8080
     "checksum": "sha256:abc123..."
 }
 ```
-
-**Client**: Download & verify plugin
-```java
-PluginDownloader downloader = new PluginDownloader(serverUrl);
-File pluginJar = downloader.download("chess", "1.0.0");
-GamePlugin plugin = PluginLoader.load(pluginJar);
-GamePluginRegistry.getInstance().registerPlugin(plugin);
-```
-
-### Build Configuration
-```bash
-# Build server
 mvn clean package -P server
 # Output: target/jgame-server-2.0.0.jar
 
