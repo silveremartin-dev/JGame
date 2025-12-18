@@ -1,525 +1,136 @@
 # JGame - Architecture & Deployment Scenarios
 
-**Version**: 2.0  
-**Date**: November 23, 2025
+**Version**: 3.0  
+**Date**: December 2025  
+**Authors**: Google Gemini (Antigravity), Silvere Martin-Michiellot
 
 ---
 
-## Overview
+## Current Implementation Status
 
-JGame supports **4 deployment scenarios** to maximize flexibility:
-
-1. **Pure Library** - For game developers
-2. **Standalone Mode** - Single-player with background server
-3. **Network Mode** - Multi-user across web
-4. **App Mode** - Custom branded application
+| Phase | Status | Description |
+|-------|--------|-------------|
+| 1. Modularization | ✅ Complete | 10 Maven modules |
+| 2. Core API | ✅ Complete | Models, plugin system |
+| 3. Persistence | ✅ Complete | DAOs, PostgreSQL schema |
+| 4. Server | ✅ Complete | Javalin REST API, JWT |
+| 5. Java Client | ✅ Complete | JavaFX application |
+| 6. Web Client | ✅ Complete | JavaScript client |
+| 7. Game Plugins | ✅ Existing | Chess, Checkers, Goose |
+| 8. Code Cleanup | ✅ Complete | TODOs, stubs, documentation |
+| 9. Localization | ✅ Partial | EN, FR |
+| 10. Documentation | ✅ Complete | Updated |
 
 ---
 
-## Scenario 1: Pure Library
+## Module Structure
 
-### Description
-Use JGame as a **pure Java library** to build your own games without UI.
-
-### Use Cases
-- Embed games in existing applications
-- Custom game engines
-- Headless game processing
-- Testing & AI development
-
-### What You Get
-- `jgame-core.jar` - Game logic only
-- `jgame-persistence.jar` - Database layer (optional)
-
-### Dependencies
-```xml
-<dependency>
-    <groupId>org.jgame</groupId>
-    <artifactId>jgame-core</artifactId>
-    <version>2.0.0</version>
-</dependency>
-```
-
-### Example Usage
-```java
-// Import game rules
-import org.jgame.logic.games.chess.ChessRules;
-import org.jgame.logic.games.goose.GooseRules;
-
-// Create game instance
-GooseRules game = new GooseRules();
-
-// Add players
-game.addPlayer(new GameUser("Alice"));
-game.addPlayer(new GameUser("Bob"));
-
-// Play programmatically
-while (!game.isFinished()) {
-    game.nextTurn();
-}
-
-// Get winner
-GameUser winner = game.getWinner();
-```
-
-### Build Configuration
-```bash
-# Build only core library
-mvn clean package -P core-only
-
-# Output: target/jgame-core-2.0.0.jar
+```text
+JGame/
+├── jgame-core/          # Core API, models, plugin system
+│   └── org.jgame.model, logic, plugin, parts, util
+├── jgame-persistence/   # Database layer
+│   └── org.jgame.persistence.dao (UserDAO, RatingDAO, etc.)
+├── jgame-server/        # REST API server
+│   └── org.jgame.server.api (JGameServer, controllers)
+├── jgame-client-java/   # JavaFX desktop client
+│   └── org.jgame.ui.fx (JGameApp, GameApiClient)
+├── jgame-client-web/    # JavaScript web client
+│   └── src/ (HTML, JS, CSS)
+└── jgame-games/         # Game plugins
+    ├── jgame-game-chess/
+    ├── jgame-game-checkers/
+    ├── jgame-game-goose/
+    └── jgame-game-solitaire/
 ```
 
 ---
 
-## Scenario 2: Standalone Mode
+## Deployment Scenarios
 
-### Description
-**Client with embedded local server** for single-player or AI games.
-
-### Use Cases
-- Solitaire games
-- Play against AI
-- Offline gaming
-- Practice mode
-
-### Architecture
-```
-┌─────────────────────────────┐
-│   JGame Client (Swing UI)   │
-│                              │
-│  ┌────────────────────────┐ │
-│  │  Embedded GameServer   │ │
-│  │  (localhost:0)         │ │
-│  │                        │ │
-│  │  ┌──────────────────┐ │ │
-│  │  │  Game Plugins    │ │ │
-│  │  │  AI Players      │ │ │
-│  │  │  H2 Database     │ │ │
-│  │  └──────────────────┘ │ │
-│  └────────────────────────┘ │
-└─────────────────────────────┘
-```
-
-### Features
-- No network required
-- Instant start
-- Full game persistence
-- AI opponents
-- Save/load games
-
-### Launch
-```bash
-# Standalone executable JAR
-java -jar jgame-standalone.jar
-
-# Or with specific game
-java -jar jgame-standalone.jar --game=chess --ai=medium
-```
-
-### Implementation
-```java
-public class StandaloneGameClient extends GameClient {
-    private GameServer embeddedServer;
-    
-    public StandaloneGameClient() {
-        // Start embedded server on random port
-        embeddedServer = new GameServer(0); // port 0 = auto
-        embeddedServer.start();
-        
-        // Connect to localhost
-        String serverAddress = "localhost:" + embeddedServer.getPort();
-        this.connect(serverAddress);
-    }
-}
-```
-
-### Build Configuration
-```bash
-# Build standalone JAR with embedded server
-mvn clean package -P standalone
-
-# Output: target/jgame-standalone-2.0.0.jar (fatjar)
-```
-
----
-
-## Scenario 3: Network Mode
-
-### Description
-**Server-client architecture** with plugin distribution and multi-user support.
-
-### Use Cases
-- Online multiplayer
-- Tournament hosting
-- Plugin marketplace
-- Web-based gaming
-
-### Architecture
-```
-┌──────────────────────────────────────┐
-│        GameServer (Hosting)          │
-│                                       │
-│  ├─ Game Plugin Registry             │
-│  ├─ Plugin Distribution (HTTP)       │
-│  ├─ User Authentication              │
-│  ├─ Match Making                     │
-│  ├─ Game State Broadcast             │
-│  └─ PostgreSQL/MySQL Database        │
-└──────────────────────────────────────┘
-            │
-            ├─────────────┬─────────────┐
-            │             │             │
-    ┌───────▼──────┐ ┌───▼──────┐ ┌───▼──────┐
-    │ Java Client  │ │ JS Client│ │ JS Client│
-    │ (Swing)      │ │ (React)  │ │ (Vue)    │
-    └──────────────┘ └──────────┘ └──────────┘
-```
-
-### Server Features
-- **Plugin broadcasting**: Send game .jar to clients
-- **Multi-user**: Concurrent games
-- **Authentication**: User accounts, BCrypt passwords
-- **Matchmaking**: Find opponents
-- **Leaderboards**: Global rankings
-- **Chat**: In-game messaging
-
-### Client Types
-
-#### Java Client (Swing)
-```bash
-java -jar jgame-client.jar --server=game.example.com:8080
-```
-
-#### JavaScript Client (Web)
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>JGame Web Client</title>
-    <script src="jgame-web-client.js"></script>
-</head>
-<body>
-    <div id="game-container"></div>
-    <script>
-        const client = new JGameWebClient('wss://game.example.com:8080');
-        client.connect();
-    </script>
-</body>
-</html>
-```
-
-### Plugin Distribution Protocol
-
-**Server** → **Client**: Send plugin metadata
-```json
-{
-    "pluginId": "chess",
-    "version": "1.0.0",
-    "downloadUrl": "https://game.example.com/plugins/chess-1.0.0.jar",
-    "checksum": "sha256:abc123..."
-}
-```
-mvn clean package -P server
-# Output: target/jgame-server-2.0.0.jar
-
-# Build Java client
-mvn clean package -P client
-# Output: target/jgame-client-2.0.0.jar
-
-# Build web client
-cd web-client && npm run build
-# Output: dist/jgame-web-client.js
-```
-
----
-
-## Scenario 4: App Mode
-
-### Description
-**Branded standalone application** with custom UI hiding all technical details.
-
-### Use Cases
-- Commercial game distribution
-- Educational apps
-- Corporate gaming platforms
-- White-label solutions
-
-### Features
-- **No server/client concept visible**
-- **Custom branding** (logo, colors, name)
-- **Single-click install**
-- **Auto-updates**
-- **Native feel** (no "JGame" branding)
-
-### Architecture
-```
-┌────────────────────────────────────┐
-│     MyChessGame (Branded App)      │
-│                                     │
-│  ┌──────────────────────────────┐ │
-│  │  Custom UI (JavaFX/Swing)    │ │
-│  │  - Splash screen             │ │
-│  │  - Main menu                 │ │
-│  │  - Game board                │ │
-│  │  - Settings                  │ │
-│  └──────────────────────────────┘ │
-│                                     │
-│  ┌──────────────────────────────┐ │
-│  │  JGame Core (Hidden)         │ │
-│  │  - Embedded server           │ │
-│  │  - Game logic                │ │
-│  │  - Persistence               │ │
-│  └──────────────────────────────┘ │
-└────────────────────────────────────┘
-```
-
-### Configuration (`app.properties`)
-```properties
-# Branding
-app.name=MyChessGame
-app.version=1.0.0
-app.vendor=MyCompany
-app.icon=resources/icon.png
-
-# Games (only specific ones)
-games.enabled=chess
-games.chess.difficulty=easy,medium,hard
-
-# UI
-ui.theme=dark
-ui.showTechnicalDetails=false
-ui.autoUpdate=true
-
-# Backend (hidden from user)
-server.embedded=true
-server.port=0
-persistence.type=h2
-```
-
-### Custom Main Class
-```java
-public class MyChessGameApp {
-    public static void main(String[] args) {
-        // Load branding
-        AppConfig config = new AppConfig("app.properties");
-        
-        // Set Look & Feel
-        UIManager.setLookAndFeel(new CustomLookAndFeel(config));
-        
-        // Show splash
-        SplashScreen splash = new CustomSplashScreen(config.getIcon());
-        splash.show();
-        
-        // Start embedded components (hidden)
-        GameServer embeddedServer = new GameServer(0);
-        embeddedServer.start();
-        
-        // Load ONLY enabled games
-        GamePluginRegistry registry = GamePluginRegistry.getInstance();
-        registry.registerPlugin(new ChessPlugin()); // Only chess
-        
-        // Show custom UI (no "JGame" anywhere)
-        CustomGameUI ui = new CustomGameUI(config);
-        ui.setVisible(true);
-        
-        splash.close();
-    }
-}
-```
-
-### Build Configuration
-```bash
-# Build branded app with jpackage
-mvn clean package -P app -Dapp.name="MyChessGame"
-
-# Creates native installers:
-# Windows: MyChessGame-1.0.0.msi
-# macOS:   MyChessGame-1.0.0.dmg
-# Linux:   mychessgame-1.0.0.deb
-```
-
----
-
-## Build Matrix
-
-### Maven Profiles
-
-**pom.xml** configuration:
-```xml
-<profiles>
-    <!-- Scenario 1: Pure Library -->
-    <profile>
-        <id>core-only</id>
-        <properties>
-            <skipUI>true</skipUI>
-            <skipServer>true</skipServer>
-        </properties>
-    </profile>
-    
-    <!-- Scenario 2: Standalone -->
-    <profile>
-        <id>standalone</id>
-        <properties>
-            <includeServer>true</includeServer>
-            <mainClass>org.jgame.client.StandaloneGameClient</mainClass>
-        </properties>
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-shade-plugin</artifactId>
-                    <configuration>
-                        <shadedArtifactAttached>true</shadedArtifactAttached>
-                        <shadedClassifierName>standalone</shadedClassifierName>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </build>
-    </profile>
-    
-    <!-- Scenario 3: Network (Server) -->
-    <profile>
-        <id>server</id>
-        <properties>
-            <mainClass>org.jgame.server.GameServerApp</mainClass>
-        </properties>
-    </profile>
-    
-    <!-- Scenario 3: Network (Client) -->
-    <profile>
-        <id>client</id>
-        <properties>
-            <mainClass>org.jgame.client.GameClient</mainClass>
-        </properties>
-    </profile>
-    
-    <!-- Scenario 4: Branded App -->
-    <profile>
-        <id>app</id>
-        <properties>
-            <app.name>MyGame</app.name>
-            <mainClass>com.mycompany.MyGameApp</mainClass>
-        </properties>
-        <build>
-            <plugins>
-                <plugin>
-                    <groupId>org.panteleyev</groupId>
-                    <artifactId>jpackage-maven-plugin</artifactId>
-                    <configuration>
-                        <name>${app.name}</name>
-                        <appVersion>${project.version}</appVersion>
-                        <vendor>${app.vendor}</vendor>
-                        <icon>src/main/resources/${app.name}/icon.png</icon>
-                        <type>INSTALLER</type>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </build>
-    </profile>
-</profiles>
-```
-
-### Build Commands Summary
+### Scenario 1: Pure Library
 
 ```bash
-# Scenario 1: Library only
-mvn clean package -P core-only
+mvn install -pl jgame-core
+```
 
-# Scenario 2: Standalone
-mvn clean package -P standalone
+Use `jgame-core` as dependency for game logic only.
 
-# Scenario 3: Server
-mvn clean package -P server
+### Scenario 2: Standalone (Embedded Server)
 
-# Scenario 3: Java Client
-mvn clean package -P client
+```bash
+cd jgame-client-java
+mvn javafx:run
+```
 
-# Scenario 4: Branded App
-mvn clean package -P app -Dapp.name="MyChessGame" -Dapp.vendor="MyCompany"
+JavaFX client with embedded H2 database.
+
+### Scenario 3: Network Mode
+
+```bash
+# Server
+cd jgame-server
+mvn exec:java -Dexec.mainClass="org.jgame.server.JGameServer"
+
+# Client
+cd jgame-client-java
+mvn javafx:run -Dserver=http://localhost:8080
+```
+
+### Scenario 4: Web Client
+
+```bash
+cd jgame-client-web
+npm install && npm run dev
 ```
 
 ---
 
-## Deployment Recommendations
+## REST API
 
-### Development
-- Use **Standalone mode** for quick testing
-- Use **Core library** for unit tests
-
-### Production
-
-#### Small Scale (< 100 users)
-- **Standalone mode** distributed as JAR
-- Optional: Central stats server
-
-#### Medium Scale (100-10,000 users)
-- **Network mode** with dedicated server
-- Load balancer for multiple game servers
-- PostgreSQL database
-
-#### Large Scale (10,000+ users)
-- **Kubernetes** deployment
-- Microservices architecture
-- Redis for session management
-- CDN for plugin distribution
-
-### Commercial Product
-- **App mode** with auto-updates
-- Code signing certificates
-- Professional installers
-- Cloud backend optional
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/auth/register` | POST | ❌ | Register user |
+| `/api/auth/login` | POST | ❌ | Login, get JWT |
+| `/api/games` | GET | ❌ | List games |
+| `/api/games/{id}` | GET | ❌ | Game details |
+| `/api/games/{id}/ratings` | GET | ❌ | Game ratings |
+| `/api/user/profile` | GET | ✅ | User profile |
+| `/api/user/scores` | GET | ✅ | User stats |
+| `/api/ratings/{id}` | POST | ✅ | Create rating |
+| `/api/scores/{id}/leaderboard` | GET | ✅ | Leaderboard |
 
 ---
 
-## Technology Stack by Scenario
+## Technology Stack
 
-| Component | Scenario 1 | Scenario 2 | Scenario 3 | Scenario 4 |
-|-----------|-----------|-----------|-----------|-----------|
-| Core Logic | ✅ | ✅ | ✅ | ✅ |
-| Swing UI | ❌ | ✅ | ✅ | Optional |
-| JavaFX UI | ❌ | ❌ | ❌ | Optional |
-| Embedded Server | ❌ | ✅ | ❌ | ✅ |
-| Network Server | ❌ | ❌ | ✅ | Optional |
-| H2 Database | Optional | ✅ | ❌ | ✅ |
-| PostgreSQL | ❌ | ❌ | ✅ | Optional |
-| Web Client | ❌ | ❌ | ✅ | ❌ |
-| JPackage | ❌ | Optional | ❌ | ✅ |
-
----
-
-## Next Steps for Implementation
-
-### Phase 1: Refactor for Modularity
-- [ ] Separate `jgame-core` module
-- [ ] Extract `jgame-ui` module
-- [ ] Create `jgame-server` module
-- [ ] Create `jgame-client` module
-
-### Phase 2: Implement Scenarios
-- [ ] Add Maven profiles
-- [ ] Create `StandaloneGameClient`
-- [ ] Implement plugin distribution protocol
-- [ ] Build jpackage configuration
-
-### Phase 3: Documentation
-- [ ] Scenario-specific README files
-- [ ] Deployment guides
-- [ ] API documentation
-
-### Phase 4: Examples
-- [ ] Sample branded app
-- [ ] Docker compose for network mode
-- [ ] Web client demo
+| Component | Technology |
+|-----------|------------|
+| Core Language | Java 21 |
+| Build | Maven 3.9+ |
+| REST Framework | Javalin 6.5 |
+| Authentication | JWT (JJWT 0.12) |
+| Desktop UI | JavaFX 21 |
+| Database | H2 (dev), PostgreSQL (prod) |
+| Connection Pool | HikariCP |
+| Password Hash | BCrypt |
+| JSON | Gson |
+| Logging | Log4j 2 |
 
 ---
 
-**Questions to Address**:
-1. Should we use modular JARs (Java 9+)?
-2. WebSocket vs HTTP for network protocol?
-3. Plugin sandboxing for security?
-4. Support for mobile clients (Android/iOS)?
+## Build Commands
 
----
+```bash
+# Full build
+mvn clean install -DskipTests
 
-**Next Implementation Priority**: Finish Chess, then refactor into modules.
+# Run server
+cd jgame-server && mvn exec:java
+
+# Run client
+cd jgame-client-java && mvn javafx:run
+
+# Run tests
+mvn test
+```

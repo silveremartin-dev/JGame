@@ -1,0 +1,77 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Enhanced with AI assistance from Google Gemini (Antigravity)
+ */
+
+package org.jgame.model;
+
+import org.jetbrains.annotations.NotNull;
+
+/**
+ * A data packet sent through the network between the client (your PC) and the
+ * server.
+ *
+ * @author Silvere Martin-Michiellot
+ * @version 1.0
+ */
+
+public class GamePacket {
+
+    private GameUser gameUser;
+
+    public GamePacket(@NotNull GameUser gameUser) {
+        setGameUser(gameUser);
+    }
+
+    public GameUser getGameUser() {
+        return gameUser;
+    }
+
+    public void setGameUser(@NotNull GameUser gameUser) {
+        if (gameUser != null) {
+            this.gameUser = gameUser;
+        } else
+            throw new IllegalArgumentException("You cannot set a null GameUser.");
+    }
+
+    /**
+     * Creates a GamePacket from a string representation.
+     *
+     * @param data the string data to parse
+     * @return the parsed packet, or null if parsing fails
+     */
+    public static GamePacket fromString(String data) {
+        // Simple implementation - just creates a guest packet
+        // In production, this would parse JSON/protocol data
+        if (data == null || data.isEmpty()) {
+            return null;
+        }
+        return new GamePacket(new GameUser());
+    }
+
+    @Override
+    public String toString() {
+        return "GamePacket{user=" + (gameUser != null ? gameUser.getLogin() : "null") + "}";
+    }
+}

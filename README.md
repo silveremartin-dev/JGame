@@ -1,171 +1,103 @@
-# JGame Framework
+# JGame Platform
 
-A modern Java game framework supporting multiple game types including board games, card games, puzzles, and platform games.
+A modern Java game platform supporting multiplayer turn-based games with client-server architecture.
 
-## 📋 Features
+## 🚀 Architecture
 
-- **Multiple Game Types**: Board games, card games, puzzles, platform games
-- **Client-Server Architecture**: Network-capable multiplayer support
-- **AI Players**: Support for computer opponents
-- **Tournament System**: Organize and manage game tournaments
-- **Extensible Design**: Abstract base classes for easy game implementation
-- **Score Tracking**: Comprehensive scoring and ranking systems
+Multi-module Maven project:
 
-## 🎮 Supported Games
+```text
+JGame/
+├── jgame-core/          # Core API, model, plugin system
+├── jgame-persistence/   # Database access, DAOs
+├── jgame-server/        # REST API server (Javalin + JWT)
+├── jgame-client-java/   # JavaFX desktop client
+├── jgame-client-web/    # JavaScript web client
+└── jgame-games/         # Game plugins
+    ├── jgame-game-chess/
+    ├── jgame-game-checkers/
+    ├── jgame-game-goose/
+    └── jgame-game-solitaire/
+```
 
-- Chess
-- Checkers
-- Game of the Goose
-- Tantrix
-- Reversi/Othello
-- Go
-- Dominos
-- Playing cards framework
+## 🎮 Features
+
+- **Multi-module Design**: Clean separation of concerns
+- **REST API**: Javalin server with JWT authentication
+- **Game Plugin System**: ZIP-based loadable game plugins
+- **Cross-platform Clients**: JavaFX and JavaScript
+- **Leaderboards**: User scores and ratings
+- **AI Support**: Pluggable AI algorithms (Minimax, Random)
+- **Localization**: Multi-language support (EN, FR)
 
 ## 🛠️ Requirements
 
-- **Java**: JDK 21 or later
-- **Build Tool**: Apache Maven 3.6+
-- **OS**: Windows, Linux, or macOS
+- Java 25+
+- Maven 3.6+
+- PostgreSQL (optional, H2 for development)
 
-## 🚀 Building the Project
+## 🔧 Building
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd JGame
-
-# Build with Maven
 mvn clean install
-
-# Run tests
-mvn test
-
-# Generate Javadoc
-mvn javadoc:javadoc
 ```
 
-## 📦 Project Structure
+## ▶️ Running
 
-```
-JGame/
-├── src/
-│   ├── main/
-│   │   ├── java/
-│   │   │   └── org/jgame/
-│   │   │       ├── client/      # Client application
-│   │   │       ├── server/      # Server application
-│   │   │       ├── logic/       # Game logic and rules
-│   │   │       ├── parts/       # Game components (boards, pieces, players)
-│   │   │       ├── ui/          # User interface
-│   │   │       ├── widgets/     # UI widgets and game pieces
-│   │   │       ├── io/          # Import/export functionality
-│   │   │       └── util/        # Utility classes
-│   │   └── resources/
-│   │       └── META-INF/
-│   └── test/
-│       └── java/                # Test classes
-├── pom.xml                      # Maven configuration
-├── LICENSE                      # MIT License
-└── README.md                    # This file
-```
-
-## 🎯 Quick Start
-
-### Running the Server
+**Server:**
 
 ```bash
-java -jar target/jgame-1.0-SNAPSHOT.jar server
+cd jgame-server
+mvn exec:java -Dexec.mainClass="org.jgame.server.JGameServer"
 ```
 
-### Running the Client
+**Client:**
 
 ```bash
-java -jar target/jgame-1.0-SNAPSHOT.jar client
+cd jgame-client-java
+mvn javafx:run
 ```
 
-## 🧩 Creating a New Game
+## 📡 REST API
 
-To create a new game, extend the appropriate abstract base class:
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/auth/register` | POST | Register user |
+| `/api/auth/login` | POST | Login, get JWT |
+| `/api/games` | GET | List games |
+| `/api/games/{id}` | GET | Game details |
+| `/api/ratings/{id}` | POST | Rate game |
 
-```java
-public class MyGame extends AbstractBoardGame {
-    @Override
-    public void initGame(int numPlayers) {
-        // Initialize game state
-    }
-    
-    @Override
-    public void startGame() {
-        // Start the game
-    }
-    
-    // Implement other required methods...
-}
-```
+## 📖 Documentation
 
-## 📚 Documentation
-
-- **Javadoc**: Run `mvn javadoc:javadoc` and open `target/site/apidocs/index.html`
-- **Developer Guide**: See `DEVELOPER_GUIDE.md` (coming soon)
-- **User Guide**: See `USER_GUIDE.md` (coming soon)
-
-## 🧪 Testing
+Generate Javadoc with frame-based class navigation:
 
 ```bash
-# Run all tests
-mvn test
-
-# Run with coverage report
-mvn clean test jacoco:report
-# View coverage at target/site/jacoco/index.html
+mvn javadoc:aggregate
 ```
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit pull requests.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Output: `javadoc/index.html`
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE)
 
-## 👤 Author
+## 👥 Authors
 
-**Silvere Martin-Michiellot**
-- Email: silvere.martin@gmail.com
+**Google Gemini (Antigravity)** - AI Developer
 
-## 🙏 Acknowledgments
+- Multi-module architecture
+- REST API implementation
+- JavaFX client
+- Database layer
+- Documentation
+- Code cleanup and quality improvements
 
-- Enhanced with AI assistance from Google Gemini (Antigravity)
-- Game piece graphics from various open-source projects
-- Inspired by classic board and card games
+**Silvere Martin-Michiellot** - Original Author
 
-## 🐛 Known Issues
-
-- UI infrastructure classes (AboutDialog, TextAndMnemonicUtils) are not yet fully implemented
-- Some game rules implementations are incomplete (marked with TODO comments)
-- Full compilation requires implementing missing UI components
-
-## 🗺️ Roadmap
-
-- [ ] Complete UI infrastructure
-- [ ] Finish game rules implementations
-- [ ] Add more game types
-- [ ] Improve AI algorithms
-- [ ] Add multiplayer matchmaking
-- [ ] Create web-based UI
-- [ ] Mobile app support
-
-## 📞 Support
-
-For issues and questions, please open an issue on the project repository.
+- Email: <silvere.martin@gmail.com>
+- Initial concept and game implementations
 
 ---
 
-**Status**: Active Development | **Version**: 1.0-SNAPSHOT | **Java**: 21
+**Version**: 1.0-SNAPSHOT | **Java**: 25 | **Status**: Active Development | **Last Updated**: December 2025 | [![JGame CI](https://github.com/silvere-martin/JGame/actions/workflows/maven.yml/badge.svg)](https://github.com/silvere-martin/JGame/actions/workflows/maven.yml)

@@ -1,0 +1,34 @@
+{
+    "id": "chess",
+    "name": "Chess",
+    "version": "1.0.0",
+    "author": "JGame Team",
+    "description": "Classic two-player strategy chess game",
+    "minPlayers": 2,
+    "maxPlayers": 2,
+    "category": "strategy",
+    "tags": [
+        "board",
+        "classic",
+        "strategy",
+        "2-player"
+    ],
+    "java": {
+        "rulesClass": "org.jgame.logic.games.chess.ChessRules",
+        "panelClass": "org.jgame.logic.games.chess.ChessFXPanel"
+    },
+    "web": {
+        "gameScript": "chess.js",
+        "uiScript": "chess-ui.js"
+    },
+    "resources": {
+        "i18n": "i18n/chess",
+        "images": "assets/images"
+    },
+    "features": {
+        "ai": true,
+        "multiplayer": true,
+        "save": true,
+        "undo": true
+    }
+}

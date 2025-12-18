@@ -1,0 +1,36 @@
+name: JGame CI
+
+on:
+    push:
+        branches: ["master", "main"]
+    pull_request:
+        branches: ["master", "main"]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up JDK 25
+              uses: actions/setup-java@v4
+              with:
+                  java-version: "25"
+                  distribution: "temurin"
+                  # If 25 is not available in temurin yet, we might need 'ea' or another logic.
+                  # Fallback logic: check typical actions/setup-java support.
+                  # For now, using '25' + 'temurin' or 'oracle' if needed.
+                  # Since '25' is EA, we might need a specific handling, but '25' is the request.
+                  check-latest: true
+
+            - name: Build with Maven
+              run: mvn -B package --file pom.xml -Dmaven.compiler.showDeprecation=true
+
+            - name: Run Tests with Coverage
+              run: mvn -B verify --file pom.xml
+
+            - name: Helper - List Coverage
+              run: |
+                  echo "Coverage Reports:"
+                  find . -name "index.html" | grep jacoco

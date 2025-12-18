@@ -1,0 +1,78 @@
+/*
+ * MIT License
+ * Copyright (c) 2025 Google Gemini (Antigravity)
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ */
+
+package org.jgame.ai;
+
+import org.jgame.logic.engine.GameAction;
+import org.jgame.logic.engine.GameState;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.List;
+import java.util.Random;
+
+/**
+ * Simple AI that makes random moves.
+ *
+ * <p>
+ * Useful for testing and as a baseline.
+ * </p>
+ *
+ * @author Google Gemini (Antigravity)
+ * @author Silvere Martin-Michiellot
+ * @version 1.0
+ */
+public class RandomAI implements GameAI {
+
+    private static final Logger logger = LogManager.getLogger(RandomAI.class);
+    private final Random random = new Random();
+    private final String name;
+
+    public RandomAI() {
+        this("Random AI");
+    }
+
+    public RandomAI(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int getDifficulty() {
+        return 1; // Easiest
+    }
+
+    @Override
+    public GameAction computeMove(GameState state) {
+        if (state == null) {
+            logger.warn("Cannot compute move: null state");
+            return null;
+        }
+
+        List<GameAction> validMoves = getValidMoves(state);
+        if (validMoves.isEmpty()) {
+            logger.debug("No valid moves available");
+            return null;
+        }
+
+        GameAction chosen = validMoves.get(random.nextInt(validMoves.size()));
+        logger.debug("Random AI chose: {}", chosen);
+        return chosen;
+    }
+
+    /**
+     * Gets valid moves from game state.
+     * Override in game-specific implementations.
+     */
+    protected List<GameAction> getValidMoves(GameState state) {
+        // Default: empty list - subclasses should override
+        return List.of();
+    }
+}

@@ -1,8 +1,0 @@
-2025-11-23 05:30:13.498054+01:00 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "GAMES" non trouvée
-Table "GAMES" not found; SQL statement:
-CREATE INDEX IF NOT EXISTS idx_games_finished ON games(is_finished) [42102-224]
-2025-11-23 05:30:47.248365+01:00 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "GAMES" non trouvée
-Table "GAMES" not found; SQL statement:
-CREATE INDEX idx_games_type ON games(game_type) [42102-224]

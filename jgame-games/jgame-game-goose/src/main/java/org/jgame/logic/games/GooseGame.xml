@@ -1,0 +1,52 @@
+<!--
+  ~ Copyright 2022 Silvere Martin-Michiellot
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<game name="Chess" description="Standard chess" version="1.0">
+    <board type="LINE" size="63" >
+        <tile id="1" name="StartTile"></tile>
+        <tile id="6" name="BridgeStart"></tile>
+        <tile id="9" name="Goose1"></tile>
+        <tile id="12" name="BridgeEnd"></tile>
+        <tile id="18" name="Goose2"></tile>
+        <tile id="19" name="StartTile"></tile>
+        <tile id="27" name="Goose3"></tile>
+        <tile id="31" name="Well"></tile>
+        <tile id="36" name="Goose4"></tile>
+        <tile id="42" name="Labyrinth"></tile>
+        <tile id="45" name="Goose5"></tile>
+        <tile id="52" name="Prison"></tile>
+        <tile id="54" name="Goose6"></tile>
+        <tile id="58" name="Death"></tile>
+        <tile id="63" name="EndTile"></tile>
+    </board>
+    <deck>
+    </deck>
+    <pieces>
+        <piece name="WhitePawn" id="1" position="1" quantity="1"></piece>
+        <piece name="BluePawn" id="2" position="1" quantity="1"></piece>
+        <piece name="RedPawn" id="3" position="1" quantity="1"></piece>
+        <piece name="PurplePawn" id="4" position="1" quantity="1"></piece>
+        <piece name="BlackPawn" id="5" position="1" quantity="1"></piece>
+        <piece name="GreenPawn" id="6" position="1" quantity="1"></piece>
+        <piece name="YellowPawn" id="7" position="1" quantity="1"></piece>
+        <piece name="BrownPawn" id="8" position="1" quantity="1"></piece>
+        <piece name="RedDice" id="9" position="1" quantity="1"></piece>
+        <piece name="WhiteDice" id="10" position="" quantity="1"></piece>
+    </pieces>
+    <rules identifier="GooseGame">
+        <rule identifier="R1" name="R1" description=""></rule>
+    </rules>
+</game>
