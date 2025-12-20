@@ -1,6 +1,7 @@
 /*
  * MIT License
- * Copyright (c) 2025 Google Gemini (Antigravity)`n * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2025 Google Gemini (Antigravity)
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot
  */
 
 package org.jgame.server.auth;
@@ -15,27 +16,79 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Properties;
 
 /**
  * JWT authentication handler for protected routes.
+ * 
+ * <p>
+ * Loads secret key from environment variable JGAME_JWT_SECRET,
+ * falling back to application.properties if not set.
+ * </p>
  *
  * @author Silvere Martin-Michiellot
- * @version 1.0
+ * @version 2.0
  */
 public class JwtAuthHandler implements Handler {
 
     private static final Logger logger = LogManager.getLogger(JwtAuthHandler.class);
-
-    // In production, use environment variable
-    private static final String SECRET_KEY = "jgame-super-secret-key-that-is-at-least-256-bits-long";
-    private static final long EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+    private static final String DEFAULT_SECRET = "jgame-dev-secret-key-change-in-production-256bit";
+    private static final long DEFAULT_EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
     private final SecretKey key;
+    private final long expirationMs;
 
     public JwtAuthHandler() {
-        this.key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+        String secret = loadSecret();
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.expirationMs = loadExpirationMs();
+        logger.info("JWT handler initialized (secret from {})",
+                System.getenv("JGAME_JWT_SECRET") != null ? "environment" : "config/default");
+    }
+
+    private String loadSecret() {
+        // Priority 1: Environment variable
+        String envSecret = System.getenv("JGAME_JWT_SECRET");
+        if (envSecret != null && !envSecret.isBlank()) {
+            return envSecret;
+        }
+
+        // Priority 2: application.properties
+        Properties props = loadProperties();
+        String propSecret = props.getProperty("jwt.secret");
+        if (propSecret != null && !propSecret.isBlank() && !propSecret.startsWith("${")) {
+            return propSecret;
+        }
+
+        // Priority 3: Default (dev only)
+        logger.warn("Using default JWT secret - NOT SAFE FOR PRODUCTION");
+        return DEFAULT_SECRET;
+    }
+
+    private long loadExpirationMs() {
+        Properties props = loadProperties();
+        String hours = props.getProperty("jwt.expiration.hours", "24");
+        try {
+            return Long.parseLong(hours) * 60 * 60 * 1000;
+        } catch (NumberFormatException e) {
+            return DEFAULT_EXPIRATION_MS;
+        }
+    }
+
+    private Properties loadProperties() {
+        Properties props = new Properties();
+        try (InputStream is = getClass().getResourceAsStream("/application.properties")) {
+            if (is != null) {
+                props.load(is);
+            }
+        } catch (IOException e) {
+            logger.warn("Could not load application.properties");
+        }
+        return props;
     }
 
     @Override
@@ -75,7 +128,7 @@ public class JwtAuthHandler implements Handler {
      */
     public String generateToken(String userId, String username) {
         Date now = new Date();
-        Date expiry = new Date(now.getTime() + EXPIRATION_MS);
+        Date expiry = new Date(now.getTime() + expirationMs);
 
         return Jwts.builder()
                 .subject(userId)

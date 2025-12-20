@@ -7,6 +7,7 @@
 package org.jgame.server;
 
 import io.javalin.Javalin;
+import io.javalin.http.HttpStatus;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +16,13 @@ import org.jgame.server.api.GameApiController;
 import org.jgame.server.api.RatingApiController;
 import org.jgame.server.api.UserApiController;
 import org.jgame.server.auth.JwtAuthHandler;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Main headless game server.
@@ -31,7 +39,7 @@ import org.jgame.server.auth.JwtAuthHandler;
  * </ul>
  *
  * @author Silvere Martin-Michiellot
- * @version 1.0
+ * @version 2.0
  */
 public class JGameServer {
 
@@ -52,12 +60,97 @@ public class JGameServer {
     }
 
     private Javalin createApp() {
-        return Javalin.create(config -> {
+        List<String> allowedOrigins = loadAllowedOrigins();
+
+        Javalin javalin = Javalin.create(config -> {
             config.http.defaultContentType = "application/json";
+
+            // CORS: Restrict to configured origins (security hardening)
             config.bundledPlugins.enableCors(cors -> cors.addRule(it -> {
-                it.allowHost("*");
+                if (allowedOrigins.contains("*")) {
+                    logger.warn("CORS allowing all origins - NOT SAFE FOR PRODUCTION");
+                    it.allowHost("*");
+                } else {
+                    for (String origin : allowedOrigins) {
+                        it.allowHost(origin);
+                    }
+                    logger.info("CORS restricted to: {}", allowedOrigins);
+                }
             }));
         });
+
+        // Global exception handler for JSON error responses
+        configureExceptionHandlers(javalin);
+
+        return javalin;
+    }
+
+    /**
+     * Configures global exception handlers for standardized JSON error responses.
+     */
+    private void configureExceptionHandlers(Javalin app) {
+        // Handle generic exceptions
+        app.exception(Exception.class, (e, ctx) -> {
+            logger.error("Unhandled exception: {}", e.getMessage(), e);
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
+            ctx.json(Map.of(
+                    "error", "Internal Server Error",
+                    "message", "An unexpected error occurred",
+                    "code", 500));
+        });
+
+        // Handle illegal argument exceptions
+        app.exception(IllegalArgumentException.class, (e, ctx) -> {
+            logger.warn("Bad request: {}", e.getMessage());
+            ctx.status(HttpStatus.BAD_REQUEST);
+            ctx.json(Map.of(
+                    "error", "Bad Request",
+                    "message", e.getMessage(),
+                    "code", 400));
+        });
+
+        // Handle not found scenarios
+        app.error(404, ctx -> {
+            ctx.json(Map.of(
+                    "error", "Not Found",
+                    "message", "The requested resource was not found",
+                    "code", 404));
+        });
+
+        logger.info("Global exception handlers configured");
+    }
+
+    /**
+     * Loads allowed CORS origins from configuration.
+     */
+    private List<String> loadAllowedOrigins() {
+        // Priority 1: Environment variable
+        String envOrigins = System.getenv("JGAME_CORS_ORIGINS");
+        if (envOrigins != null && !envOrigins.isBlank()) {
+            return Arrays.asList(envOrigins.split(","));
+        }
+
+        // Priority 2: application.properties
+        Properties props = loadProperties();
+        String propOrigins = props.getProperty("cors.allowed.origins");
+        if (propOrigins != null && !propOrigins.isBlank()) {
+            return Arrays.asList(propOrigins.split(","));
+        }
+
+        // Default: localhost only (secure default)
+        return List.of("http://localhost:3000", "http://localhost:8080");
+    }
+
+    private Properties loadProperties() {
+        Properties props = new Properties();
+        try (InputStream is = getClass().getResourceAsStream("/application.properties")) {
+            if (is != null) {
+                props.load(is);
+            }
+        } catch (IOException e) {
+            logger.warn("Could not load application.properties");
+        }
+        return props;
     }
 
     /**

@@ -18,22 +18,25 @@ import java.util.stream.Collectors;
  * Manages the H2 database connection pooling and initialization.
  * 
  * <p>
- * This class handles:
- * - HikariCP connection pooling for high performance
- * - Schema initialization from schema.sql
- * - Connection lifecycle management
- * - Configurable pool settings from performance.properties
+ * Loads configuration from environment variables or properties file:
+ * <ul>
+ * <li>JGAME_DB_URL / db.url - JDBC URL</li>
+ * <li>JGAME_DB_USER / db.user - Database username</li>
+ * <li>JGAME_DB_PASSWORD / db.password - Database password</li>
+ * </ul>
  * </p>
  * 
  * @author Silvere Martin-Michiellot
- * @version 2.0
+ * @version 3.0
  */
 public class DatabaseManager {
 
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
-    private static final String DB_URL = "jdbc:h2:./data/jgame;AUTO_SERVER=TRUE";
-    private static final String DB_USER = "sa";
-    private static final String DB_PASSWORD = "";
+
+    // Default values for development
+    private static final String DEFAULT_URL = "jdbc:h2:./data/jgame;AUTO_SERVER=TRUE";
+    private static final String DEFAULT_USER = "sa";
+    private static final String DEFAULT_PASSWORD = "";
 
     private static HikariDataSource dataSource;
     private static boolean initialized = false;
@@ -59,26 +62,34 @@ public class DatabaseManager {
             // Load H2 driver
             Class.forName("org.h2.Driver");
 
+            // Load configuration
+            String url = getConfig("JGAME_DB_URL", "db.url", DEFAULT_URL);
+            String user = getConfig("JGAME_DB_USER", "db.user", DEFAULT_USER);
+            String password = getConfig("JGAME_DB_PASSWORD", "db.password", DEFAULT_PASSWORD);
+
+            LOGGER.info("Database URL: " + url + " (from " +
+                    (System.getenv("JGAME_DB_URL") != null ? "environment" : "config/default") + ")");
+
             // Load performance properties
-            Properties props = loadPerformanceProperties();
+            Properties perfProps = loadPerformanceProperties();
 
             // Configure HikariCP
             HikariConfig config = new HikariConfig();
-            config.setJdbcUrl(DB_URL);
-            config.setUsername(DB_USER);
-            config.setPassword(DB_PASSWORD);
+            config.setJdbcUrl(url);
+            config.setUsername(user);
+            config.setPassword(password);
 
             // Connection pool settings from performance.properties
             config.setMaximumPoolSize(Integer.parseInt(
-                    props.getProperty("hikaricp.maximumPoolSize", "10")));
+                    perfProps.getProperty("hikaricp.maximumPoolSize", "10")));
             config.setMinimumIdle(Integer.parseInt(
-                    props.getProperty("hikaricp.minimumIdle", "5")));
+                    perfProps.getProperty("hikaricp.minimumIdle", "5")));
             config.setConnectionTimeout(Long.parseLong(
-                    props.getProperty("hikaricp.connectionTimeout", "30000")));
+                    perfProps.getProperty("hikaricp.connectionTimeout", "30000")));
             config.setIdleTimeout(Long.parseLong(
-                    props.getProperty("hikaricp.idleTimeout", "600000")));
+                    perfProps.getProperty("hikaricp.idleTimeout", "600000")));
             config.setMaxLifetime(Long.parseLong(
-                    props.getProperty("hikaricp.maxLifetime", "1800000")));
+                    perfProps.getProperty("hikaricp.maxLifetime", "1800000")));
 
             // Pool name for logging
             config.setPoolName("JGamePool");
@@ -108,6 +119,42 @@ public class DatabaseManager {
     }
 
     /**
+     * Gets configuration value from environment variable, properties, or default.
+     */
+    private static String getConfig(String envVar, String propKey, String defaultValue) {
+        // Priority 1: Environment variable
+        String envValue = System.getenv(envVar);
+        if (envValue != null && !envValue.isBlank()) {
+            return envValue;
+        }
+
+        // Priority 2: application.properties
+        Properties props = loadApplicationProperties();
+        String propValue = props.getProperty(propKey);
+        if (propValue != null && !propValue.isBlank() && !propValue.startsWith("${")) {
+            return propValue;
+        }
+
+        // Priority 3: Default
+        return defaultValue;
+    }
+
+    /**
+     * Loads application properties from file.
+     */
+    private static Properties loadApplicationProperties() {
+        Properties props = new Properties();
+        try (InputStream is = DatabaseManager.class.getResourceAsStream("/application.properties")) {
+            if (is != null) {
+                props.load(is);
+            }
+        } catch (IOException e) {
+            LOGGER.warning("Could not load application.properties");
+        }
+        return props;
+    }
+
+    /**
      * Loads performance properties from file.
      */
     private static Properties loadPerformanceProperties() throws IOException {
@@ -125,9 +172,9 @@ public class DatabaseManager {
      */
     private static void initializeWithDefaults() throws SQLException {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(DB_URL);
-        config.setUsername(DB_USER);
-        config.setPassword(DB_PASSWORD);
+        config.setJdbcUrl(getConfig("JGAME_DB_URL", "db.url", DEFAULT_URL));
+        config.setUsername(getConfig("JGAME_DB_USER", "db.user", DEFAULT_USER));
+        config.setPassword(getConfig("JGAME_DB_PASSWORD", "db.password", DEFAULT_PASSWORD));
         config.setMaximumPoolSize(10);
         config.setMinimumIdle(5);
         config.setPoolName("JGamePool");
