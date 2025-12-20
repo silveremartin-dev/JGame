@@ -1,0 +1,85 @@
+<!--
+  ~ Copyright 2022 Silvere Martin-Michiellot
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<game name="" description="" version="">
+    <deck>
+        <card name="ace of clubs"></card>
+        <card name="ace of diamonds"></card>
+        <card name="ace of hearts"></card>
+        <card name="ace of spades"></card>
+        <card name="two of clubs"></card>
+        <card name="two of diamonds"></card>
+        <card name="two of hearts"></card>
+        <card name="two of spades"></card>
+        <card name="three of clubs"></card>
+        <card name="three of diamonds"></card>
+        <card name="three of hearts"></card>
+        <card name="three of spades"></card>
+        <card name="four of clubs"></card>
+        <card name="four of diamonds"></card>
+        <card name="four of hearts"></card>
+        <card name="four of spades"></card>
+        <card name="five of clubs"></card>
+        <card name="five of diamonds"></card>
+        <card name="five of hearts"></card>
+        <card name="five of spades"></card>
+        <card name="six of clubs"></card>
+        <card name="six of diamonds"></card>
+        <card name="six of hearts"></card>
+        <card name="six of spades"></card>
+        <card name="seven of clubs"></card>
+        <card name="seven of diamonds"></card>
+        <card name="seven of hearts"></card>
+        <card name="seven of spades"></card>
+        <card name="eight of clubs"></card>
+        <card name="eight of diamonds"></card>
+        <card name="eight of hearts"></card>
+        <card name="eight of spades"></card>
+        <card name="nine of clubs"></card>
+        <card name="nine of diamonds"></card>
+        <card name="nine of hearts"></card>
+        <card name="nine of spades"></card>
+        <card name="ten of clubs"></card>
+        <card name="ten of diamonds"></card>
+        <card name="ten of hearts"></card>
+        <card name="ten of spades"></card>
+        <card name="jack of clubs"></card>
+        <card name="jack of diamonds"></card>
+        <card name="jack of hearts"></card>
+        <card name="jack of spades"></card>
+        <card name="queen of clubs"></card>
+        <card name="queen of diamonds"></card>
+        <card name="queen of hearts"></card>
+        <card name="queen of spades"></card>
+        <card name="king of clubs"></card>
+        <card name="king of diamonds"></card>
+        <card name="king of hearts"></card>
+        <card name="king of spades"></card>
+        <card name="clubs"></card>
+        <card name="diamonds"></card>
+        <card name="hearts"></card>
+        <card name="spades"></card>
+        <card name="clubs"></card>
+        <card name="diamonds"></card>
+        <card name="hearts"></card>
+        <card name="spades"></card>
+    </deck>
+    <pieces>
+    </pieces>
+    <rules>
+        <rule identifier="" name="" description=""></rule>
+    </rules>
+</game>

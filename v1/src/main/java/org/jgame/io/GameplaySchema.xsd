@@ -1,0 +1,60 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="gameplay">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="players">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="player">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="pieces">
+                                            <xs:complexType>
+                                                <xs:sequence>
+                                                    <xs:element name="piece">
+                                                        <xs:complexType>
+                                                            <xs:simpleContent>
+                                                                <xs:extension base="xs:string">
+                                                                    <xs:attribute type="xs:string" name="position"/>
+                                                                </xs:extension>
+                                                            </xs:simpleContent>
+                                                        </xs:complexType>
+                                                    </xs:element>
+                                                </xs:sequence>
+                                            </xs:complexType>
+                                        </xs:element>
+                                        <xs:element type="xs:string" name="score"/>
+                                        <xs:element type="xs:string" name="inventory"/>
+                                        <xs:element type="xs:string" name="pot"/>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element type="xs:string" name="inventory"/>
+                <xs:element type="xs:string" name="pot"/>
+                <xs:element name="moves">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="move">
+                                <xs:complexType>
+                                    <xs:simpleContent>
+                                        <xs:extension base="xs:string">
+                                            <xs:attribute type="xs:string" name="id"/>
+                                            <xs:attribute type="xs:string" name="player"/>
+                                            <xs:attribute type="xs:string" name="rule"/>
+                                        </xs:extension>
+                                    </xs:simpleContent>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="gamename"/>
+            <xs:attribute type="xs:string" name="gameversion"/>
+            <xs:attribute type="xs:string" name="date"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

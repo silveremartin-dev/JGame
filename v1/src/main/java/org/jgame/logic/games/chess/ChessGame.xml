@@ -1,0 +1,59 @@
+<!--
+  ~ Copyright 2022 Silvere Martin-Michiellot
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<game name="Chess" description="Standard chess" version="1.0">
+    <board type="SQUARE" size="8,8" >
+    </board>
+    <deck>
+    </deck>
+    <pieces>
+        <piece name="WhitePawn" id="1" position="1,2" quantity="1"></piece>
+        <piece name="WhitePawn" id="2" position="2,2" quantity="1"></piece>
+        <piece name="WhitePawn" id="3" position="3,2" quantity="1"></piece>
+        <piece name="WhitePawn" id="4" position="4,2" quantity="1"></piece>
+        <piece name="WhitePawn" id="5" position="5,2" quantity="1"></piece>
+        <piece name="WhitePawn" id="6" position="6,2" quantity="1"></piece>
+        <piece name="WhitePawn" id="7" position="7,2" quantity="1"></piece>
+        <piece name="WhitePawn" id="8" position="8,2" quantity="1"></piece>
+        <piece name="BlackPawn" id="9" position="1,7" quantity="1"></piece>
+        <piece name="BlackPawn" id="10" position="2,7" quantity="1"></piece>
+        <piece name="BlackPawn" id="11" position="3,7" quantity="1"></piece>
+        <piece name="BlackPawn" id="12" position="4,7" quantity="1"></piece>
+        <piece name="BlackPawn" id="13" position="5,7" quantity="1"></piece>
+        <piece name="BlackPawn" id="14" position="6,7" quantity="1"></piece>
+        <piece name="BlackPawn" id="15" position="7,7" quantity="1"></piece>
+        <piece name="BlackPawn" id="16" position="8,7" quantity="1"></piece>
+        <piece name="WhiteRook" id="17" position="1,1" quantity="1"></piece>
+        <piece name="WhiteRook" id="18" position="8,1" quantity="1"></piece>
+        <piece name="BlackRook" id="19" position="1,8" quantity="1"></piece>
+        <piece name="BlackRook" id="20" position="8,8" quantity="1"></piece>
+        <piece name="WhiteBishop" id="21" position="3,1" quantity="1"></piece>
+        <piece name="WhiteBishop" id="22" position="5,1" quantity="1"></piece>
+        <piece name="BlackBishop" id="23" position="3,8" quantity="1"></piece>
+        <piece name="BlackBishop" id="24" position="5,8" quantity="1"></piece>
+        <piece name="WhiteKnight" id="25" position="2,1" quantity="1"></piece>
+        <piece name="WhiteKnight" id="26" position="7,1" quantity="1"></piece>
+        <piece name="BlackKnight" id="27" position="2,8" quantity="1"></piece>
+        <piece name="BlackKnight" id="28" position="7,8" quantity="1"></piece>
+        <piece name="WhiteKing" id="29" position="5,1" quantity="1"></piece>
+        <piece name="BlackKing" id="30" position="5,8" quantity="1"></piece>
+        <piece name="WhiteQueen" id="31" position="4,1" quantity="1"></piece>
+        <piece name="BlackQueen" id="32" position="4,8" quantity="1"></piece>
+    </pieces>
+    <rules>
+        <rule identifier="" name="" description=""></rule>
+    </rules>
+</game>

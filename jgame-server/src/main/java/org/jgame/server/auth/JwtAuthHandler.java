@@ -14,11 +14,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jgame.server.security.TokenBlacklist;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Properties;
 
@@ -31,7 +33,7 @@ import java.util.Properties;
  * </p>
  *
  * @author Silvere Martin-Michiellot
- * @version 2.0
+ * @version 2.1
  */
 public class JwtAuthHandler implements Handler {
 
@@ -102,6 +104,12 @@ public class JwtAuthHandler implements Handler {
 
         String token = authHeader.substring(7);
 
+        // Check blacklist
+        if (TokenBlacklist.getInstance().isRevoked(token)) {
+            logger.warn("Revoked token used");
+            throw new UnauthorizedResponse("Token has been revoked");
+        }
+
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(key)
@@ -137,5 +145,25 @@ public class JwtAuthHandler implements Handler {
                 .expiration(expiry)
                 .signWith(key)
                 .compact();
+    }
+
+    /**
+     * Revokes a token.
+     * 
+     * @param token the token string (without Bearer prefix)
+     */
+    public void revokeToken(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            Instant expiry = claims.getExpiration().toInstant();
+            TokenBlacklist.getInstance().revoke(token, expiry);
+        } catch (Exception e) {
+            logger.warn("Failed to revoke token: {}", e.getMessage());
+        }
     }
 }

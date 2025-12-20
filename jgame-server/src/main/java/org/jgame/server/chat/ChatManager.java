@@ -8,6 +8,7 @@ package org.jgame.server.chat;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jgame.server.security.HtmlSanitizer;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,15 +16,20 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Manages chat messages for lobbies.
+ * 
+ * <p>
+ * Uses HtmlSanitizer for comprehensive XSS protection.
+ * </p>
  *
  * @author Google Gemini (Antigravity)
  * @author Silvere Martin-Michiellot
- * @version 1.0
+ * @version 2.0
  */
 public class ChatManager {
 
     private static final Logger logger = LogManager.getLogger(ChatManager.class);
     private static final int MAX_MESSAGES_PER_LOBBY = 100;
+    private static final int MAX_MESSAGE_LENGTH = 500;
     private static ChatManager instance;
 
     private final Map<String, List<ChatMessage>> lobbyMessages = new ConcurrentHashMap<>();
@@ -50,8 +56,8 @@ public class ChatManager {
         if (content == null || content.isBlank())
             return;
 
-        // Sanitize content
-        String sanitized = sanitize(content);
+        // Comprehensive sanitization using HtmlSanitizer
+        String sanitized = HtmlSanitizer.sanitizeAndTruncate(content, MAX_MESSAGE_LENGTH);
         ChatMessage message = ChatMessage.chat(senderId, senderName, lobbyId, sanitized);
         addMessage(lobbyId, message);
     }
@@ -134,13 +140,5 @@ public class ChatManager {
      */
     public void removeListener(ChatListener listener) {
         listeners.remove(listener);
-    }
-
-    private String sanitize(String content) {
-        // Basic sanitization
-        return content.trim()
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .substring(0, Math.min(content.length(), 500)); // Max 500 chars
     }
 }
