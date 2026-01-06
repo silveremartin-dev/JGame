@@ -19,10 +19,8 @@
             <groupId>org.jgame</groupId>
             <artifactId>jgame-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.jgame</groupId>
-            <artifactId>jgame-persistence</artifactId>
-        </dependency>
+        <!-- Persistence removed -->
+
         <dependency>
             <groupId>org.jgame</groupId>
             <artifactId>jgame-game-chess</artifactId>
@@ -84,7 +82,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>org.jgame.client.GameClientApp</mainClass>
+                    <mainClass>org.jgame.ui.fx.JGameApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>

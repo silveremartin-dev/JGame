@@ -38,7 +38,7 @@
 
     <modules>
         <module>jgame-core</module>
-        <module>jgame-persistence</module>
+        <!-- Persistence merged into server -->
         <module>jgame-server</module>
         <module>jgame-client-java</module>
         <module>jgame-games</module>

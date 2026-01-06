@@ -1,6 +1,7 @@
 /*
  * MIT License
- * Copyright (c) 2025 Google Gemini (Antigravity)`n * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2025 Google Gemini (Antigravity)
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot
  */
 
 package org.jgame.server.api;
@@ -10,7 +11,7 @@ import io.javalin.http.Context;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jgame.model.GameRating;
-import org.jgame.persistence.dao.RatingDAO;
+import org.jgame.server.persistence.dao.RatingDAO;
 
 import java.util.List;
 import java.util.Map;
@@ -19,14 +20,33 @@ import java.util.Map;
  * REST API controller for game ratings.
  *
  * @author Silvere Martin-Michiellot
- * @version 1.0
+ * @version 2.0
  */
 public class RatingApiController {
 
     private static final Logger logger = LogManager.getLogger(RatingApiController.class);
     private static final Gson gson = new Gson();
 
-    private final RatingDAO ratingDAO = new RatingDAO();
+    private final RatingDAO ratingDAO;
+
+    /**
+     * Creates a new RatingApiController with injected dependencies.
+     * 
+     * @param ratingDAO data access object for ratings
+     */
+    public RatingApiController(RatingDAO ratingDAO) {
+        this.ratingDAO = ratingDAO;
+    }
+
+    /**
+     * Default constructor for backward compatibility.
+     * 
+     * @deprecated Use {@link #RatingApiController(RatingDAO)} instead.
+     */
+    @Deprecated
+    public RatingApiController() {
+        this(new RatingDAO());
+    }
 
     /**
      * GET /api/games/{gameId}/ratings - Get all ratings for a game

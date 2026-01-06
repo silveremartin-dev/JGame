@@ -11,7 +11,10 @@ import io.javalin.http.HttpStatus;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jgame.persistence.DatabaseManager;
+import org.jgame.server.persistence.DatabaseManager;
+import org.jgame.server.persistence.dao.RatingDAO;
+import org.jgame.server.persistence.dao.UserDAO;
+import org.jgame.server.persistence.dao.UserGameStatsDAO;
 import org.jgame.server.api.GameApiController;
 import org.jgame.server.api.RatingApiController;
 import org.jgame.server.api.UserApiController;
@@ -48,6 +51,7 @@ public class JGameServer {
 
     private final Javalin app;
     private final int port;
+    private final DatabaseManager dbManager;
 
     /**
      * Creates a new game server.
@@ -57,6 +61,7 @@ public class JGameServer {
     public JGameServer(int port) {
         this.port = port;
         this.app = createApp();
+        this.dbManager = DatabaseManager.getInstance();
     }
 
     private Javalin createApp() {
@@ -159,14 +164,14 @@ public class JGameServer {
     public void start() {
         // Initialize database
         try {
-            DatabaseManager.initialize();
+            dbManager.initialize();
             logger.info("Database initialized");
         } catch (Exception e) {
             logger.error("Failed to initialize database", e);
             throw new RuntimeException("Database initialization failed", e);
         }
 
-        // Register routes
+        // Register routes with dependency injection
         registerRoutes();
 
         // Start server
@@ -175,10 +180,20 @@ public class JGameServer {
     }
 
     private void registerRoutes() {
+        // Composition Root: Instantiate and wire dependencies
+
+        // Data Access Layer
+        UserDAO userDAO = new UserDAO(dbManager);
+        UserGameStatsDAO statsDAO = new UserGameStatsDAO(dbManager);
+        RatingDAO ratingDAO = new RatingDAO(dbManager);
+
+        // Security/Auth
         JwtAuthHandler authHandler = new JwtAuthHandler();
-        UserApiController userController = new UserApiController();
-        GameApiController gameController = new GameApiController();
-        RatingApiController ratingController = new RatingApiController();
+
+        // Controllers (Presentation Layer)
+        UserApiController userController = new UserApiController(userDAO, statsDAO, authHandler);
+        GameApiController gameController = new GameApiController(statsDAO);
+        RatingApiController ratingController = new RatingApiController(ratingDAO);
 
         // Public routes
         app.post("/api/auth/register", userController::register);
@@ -208,7 +223,7 @@ public class JGameServer {
         // Health check
         app.get("/health", ctx -> ctx.result("OK"));
 
-        logger.info("Routes registered");
+        logger.info("Routes registered with injected dependencies");
     }
 
     /**
@@ -216,7 +231,7 @@ public class JGameServer {
      */
     public void stop() {
         app.stop();
-        DatabaseManager.shutdown();
+        dbManager.shutdown();
         logger.info("JGame Server stopped");
     }
 

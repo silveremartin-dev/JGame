@@ -1,6 +1,7 @@
 /*
  * MIT License
- * Copyright (c) 2025 Google Gemini (Antigravity)`n * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2025 Google Gemini (Antigravity)
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot
  */
 
 package org.jgame.server.api;
@@ -9,7 +10,7 @@ import io.javalin.http.Context;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jgame.model.GameScore;
-import org.jgame.persistence.dao.UserGameStatsDAO;
+import org.jgame.server.persistence.dao.UserGameStatsDAO;
 import org.jgame.plugin.GameDescriptor;
 
 import java.util.List;
@@ -19,13 +20,13 @@ import java.util.Map;
  * REST API controller for game operations.
  *
  * @author Silvere Martin-Michiellot
- * @version 1.0
+ * @version 2.0
  */
 public class GameApiController {
 
         private static final Logger logger = LogManager.getLogger(GameApiController.class);
 
-        private final UserGameStatsDAO statsDAO = new UserGameStatsDAO();
+        private final UserGameStatsDAO statsDAO;
 
         // Hardcoded game list for now - later will come from PluginLoader
         private static final List<GameDescriptor> AVAILABLE_GAMES = List.of(
@@ -37,6 +38,25 @@ public class GameApiController {
                                         "Classic dice-based board game", "Roll dice and reach the end", 2, 6, Map.of()),
                         new GameDescriptor("solitaire", "Solitaire", "1.0", "JGame",
                                         "Klondike solitaire", "Classic card game", 1, 1, Map.of()));
+
+        /**
+         * Creates a new GameApiController with injected dependencies.
+         * 
+         * @param statsDAO data access object for game stats
+         */
+        public GameApiController(UserGameStatsDAO statsDAO) {
+                this.statsDAO = statsDAO;
+        }
+
+        /**
+         * Default constructor for backward compatibility.
+         * 
+         * @deprecated Use {@link #GameApiController(UserGameStatsDAO)} instead.
+         */
+        @Deprecated
+        public GameApiController() {
+                this(new UserGameStatsDAO());
+        }
 
         /**
          * GET /api/games - List all available games
