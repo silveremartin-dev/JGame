@@ -15,7 +15,7 @@ echo.
 REM Create output directory
 if not exist "javadoc" mkdir javadoc
 
-REM Generate Javadoc using standard plugin
+REM Generate Javadoc
 echo Generating Javadoc...
 call mvn javadoc:aggregate -Ddoctitle="JGame Platform API" -Dwindowtitle="JGame API" -DoutputDirectory=javadoc
 
@@ -26,17 +26,10 @@ if %errorlevel% equ 0 (
     echo ========================================
     echo.
     echo Output: javadoc\index.html
-    echo.
     
-    REM Open in browser
-    if exist "javadoc\index.html" (
-        start javadoc\index.html
-    ) else (
-        echo Note: Check javadoc folder for output
-        dir javadoc
-    )
+    REM List output
+    dir javadoc
 ) else (
     echo Javadoc generation failed.
+    exit /b 1
 )
-
-pause

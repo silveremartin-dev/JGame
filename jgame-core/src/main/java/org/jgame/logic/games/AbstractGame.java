@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
-
 package org.jgame.logic.games;
 
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +31,7 @@ import org.jgame.parts.PieceInterface;
 import java.util.Set;
 
 public abstract class AbstractGame implements GameInterface {
-    
+
     private final String name;
     private final String version;
     private final String description;
@@ -80,5 +76,32 @@ public abstract class AbstractGame implements GameInterface {
     public void setRuleset(@NotNull final Set<Rule> ruleset) {
         this.ruleset = ruleset;
     }
-    
+
+    // --- Engine / Player Management Logic ---
+
+    protected java.util.List<org.jgame.parts.PlayerInterface> players = new java.util.ArrayList<>();
+
+    public java.util.List<org.jgame.parts.PlayerInterface> getPlayers() {
+        return players;
+    }
+
+    public void addPlayer(org.jgame.parts.PlayerInterface player) {
+        if (player != null) {
+            players.add(player);
+        }
+    }
+
+    /**
+     * Helper to add a GameUser as a GamePlayer.
+     * 
+     * @param user the user to add
+     */
+    public void addPlayer(org.jgame.model.GameUser user) {
+        addPlayer(new org.jgame.parts.players.GamePlayer(user));
+    }
+
+    public abstract org.jgame.parts.PlayerInterface getWinner();
+
+    // isFinished() is already defined in GameInterface interface as default (false)
+    // Subclasses should override logic
 }

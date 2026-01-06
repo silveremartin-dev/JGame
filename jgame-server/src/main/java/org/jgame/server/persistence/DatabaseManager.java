@@ -293,12 +293,4 @@ public class DatabaseManager {
 
     // --- Static Delegates for Backward Compatibility ---
 
-    /**
-     * @deprecated Use dependency injection and {@link #getConnectionInternal()}
-     *             instead.
-     */
-    @Deprecated
-    public static Connection getConnection() throws SQLException {
-        return getInstance().getConnectionInternal();
-    }
 }

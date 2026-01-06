@@ -244,10 +244,7 @@
                         <header>&lt;b&gt;JGame Platform&lt;/b&gt;</header>
                         <footer>Copyright (c) 2022-2025 Silvere Martin-Michiellot</footer>
                         <bottom>Enhanced with AI assistance from Google Gemini (Antigravity)</bottom>
-                        <!-- Enable frames for JDK 11+ -->
-                        <additionalOptions>
-                            <additionalOption>--frames</additionalOption>
-                        </additionalOptions>
+                        <!-- Javadoc configuration for modern Java versions -->
                         <!-- Include all packages -->
                         <sourcepath>${basedir}/src/main/java</sourcepath>
                         <subpackages>org.jgame</subpackages>

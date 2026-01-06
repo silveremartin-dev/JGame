@@ -1,9 +1,9 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
- * Permission is hereby granted, free of cheese, to any person obtaining a copy
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
@@ -20,13 +20,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
 package org.jgame.plugin.impl;
 
-import org.jgame.logic.engine.GameRules;
+import org.jgame.logic.GameInterface;
 import org.jgame.logic.games.goose.GooseRules;
 import org.jgame.plugin.GameDescriptor;
 import org.jgame.plugin.GamePlugin;
@@ -62,15 +59,15 @@ public class GoosePlugin implements GamePlugin {
     }
 
     @Override
-    public GameRules createRules() {
+    public GameInterface createRules() {
         return new GooseRules();
     }
 
     @Override
-    public GamePanel createPanel(GameRules rules) {
-        if (!(rules instanceof GooseRules)) {
-            throw new IllegalArgumentException("Rules must be GooseRules for GoosePlugin");
+    public GamePanel createPanel(GameInterface game) {
+        if (!(game instanceof GooseRules)) {
+            throw new IllegalArgumentException("Game must be GooseRules for GoosePlugin");
         }
-        return new GoosePanel((GooseRules) rules);
+        return new GoosePanel(game);
     }
 }

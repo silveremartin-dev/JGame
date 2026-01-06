@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,20 +20,33 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
-
 /**
- * square black and white 8x8
- * square black and white 10x10
- * monopoly
- * game of the goose
- * oware
- * hexagonal game board
- *
+ * Board implementations for various game types.
+ * 
+ * <p>
+ * This package provides abstract board implementations for different board
+ * geometries
+ * including square grids, hexagonal grids, and linear boards. All boards
+ * implement
+ * {@link org.jgame.parts.BoardInterface}.
+ * </p>
+ * 
+ * <h2>Available Board Types</h2>
+ * <ul>
+ * <li>{@link org.jgame.parts.boards.AbstractBoard} - Base board
+ * implementation</li>
+ * <li>{@link org.jgame.parts.boards.AbstractSquareBoard} - Square grid boards
+ * (Chess, Checkers)</li>
+ * <li>{@link org.jgame.parts.boards.AbstractLineBoard} - Linear boards (Game of
+ * the Goose)</li>
+ * <li>{@link org.jgame.parts.boards.AbstractHexagonalBoard} - Hexagonal grid
+ * boards</li>
+ * </ul>
+ * 
  * @since 1.0
- * @version 1.0
+ * @version 2.0
+ * @see org.jgame.parts.BoardInterface
+ * @see org.jgame.parts.tiles
  */
 package org.jgame.parts.boards;

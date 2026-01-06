@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,42 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
-
 /**
- *
+ * Scoring system implementations for games.
+ * 
+ * <p>
+ * This package provides various scoring system implementations that can be used
+ * to track player performance in games. All scoring systems implement
+ * {@link org.jgame.logic.ScoreInterface}.
+ * </p>
+ * 
+ * <h2>Available Score Types</h2>
+ * <ul>
+ * <li>{@link org.jgame.logic.scores.IntScore} - Integer-based scoring</li>
+ * <li>{@link org.jgame.logic.scores.DoubleScore} - Floating-point scoring</li>
+ * <li>{@link org.jgame.logic.scores.TimeBasedScore} - Time-based scoring (speed
+ * runs)</li>
+ * <li>{@link org.jgame.logic.scores.MoveBasedScore} - Move count scoring
+ * (efficiency)</li>
+ * <li>{@link org.jgame.logic.scores.GradeScore} - Letter grade scoring
+ * (A-F)</li>
+ * </ul>
+ * 
+ * <h2>Usage Example</h2>
+ * 
+ * <pre>{@code
+ * ScoreInterface playerScore = new IntScore(100);
+ * playerScore.add(50); // Score is now 150
+ * 
+ * TimeBasedScore speedScore = new TimeBasedScore();
+ * speedScore.startTimer();
+ * // ... gameplay ...
+ * speedScore.stopTimer();
+ * }</pre>
+ * 
  * @since 1.0
- * @version 1.0
+ * @version 2.0
+ * @see org.jgame.logic.ScoreInterface
  */
 package org.jgame.logic.scores;

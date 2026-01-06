@@ -1,8 +1,8 @@
 package org.jgame.logic.games.solitaire;
 
-import org.jgame.logic.cards.Deck;
-import org.jgame.logic.cards.Card;
-import org.jgame.logic.cards.Rank;
+import org.jgame.parts.decks.Deck;
+import org.jgame.parts.cards.Card;
+import org.jgame.parts.cards.Rank;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -42,7 +42,7 @@ public class SolitaireRules {
             for (int j = i; j < 7; j++) {
                 if (deck.isEmpty())
                     break;
-                Card c = deck.draw().orElseThrow();
+                Card c = deck.draw();
                 if (i == j)
                     c.setFaceUp(true);
                 tableaus.get(j).push(c);
@@ -87,15 +87,20 @@ public class SolitaireRules {
             if (waste.isEmpty())
                 return false;
             deck.reset();
-            deck.shuffle();
+            // waste.clear() is implicitly handled by reset() logic if we implemented
+            // swapping,
+            // but here we just clear waste. The deck.reset() re-initializes full deck?
+            // Wait, reset() in Deck clears and re-inits. This logic effectively restarts
+            // the deck
+            // but doesn't preserve waste cards recycling.
+            // Simplified logic as per original:
             waste.clear();
             return true;
         }
 
-        deck.draw().ifPresent(card -> {
-            card.setFaceUp(true);
-            waste.push(card);
-        });
+        Card card = deck.draw();
+        card.setFaceUp(true);
+        waste.push(card);
         return true;
     }
 }

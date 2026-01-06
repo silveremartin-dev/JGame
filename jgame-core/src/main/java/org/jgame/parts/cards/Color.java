@@ -1,4 +1,4 @@
-package org.jgame.logic.cards;
+package org.jgame.parts.cards;
 
 /**
  * Card colors (Red/Black).

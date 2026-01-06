@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
 package org.jgame.plugin;
 
-import org.jgame.logic.engine.GameRules;
+import org.jgame.logic.GameInterface;
 import org.jgame.plugin.ui.GamePanel;
 
 /**
@@ -41,7 +38,7 @@ import org.jgame.plugin.ui.GamePanel;
  * <h2>Implementation Requirements:</h2>
  * <ul>
  * <li>Provide a {@link GameDescriptor} with game metadata</li>
- * <li>Create {@link GameRules} instances for game logic</li>
+ * <li>Create {@link GameInterface} instances for game logic</li>
  * <li>Create {@link GamePanel} instances for UI rendering</li>
  * </ul>
  * 
@@ -65,12 +62,12 @@ import org.jgame.plugin.ui.GamePanel;
  *         }
  * 
  *         &#64;Override
- *         public GameRules createRules() {
+ *         public GameInterface createRules() {
  *             return new GooseRules();
  *         }
  * 
  *         @Override
- *         public GamePanel createPanel(GameRules rules) {
+ *         public GamePanel createPanel(GameInterface rules) {
  *             return new GoosePanel((GooseRules) rules);
  *         }
  *     }
@@ -79,6 +76,7 @@ import org.jgame.plugin.ui.GamePanel;
  * 
  * @author Silvere Martin-Michiellot
  * @version 1.0
+ * @author Google Gemini (Antigravity)
  */
 public interface GamePlugin {
 
@@ -90,16 +88,16 @@ public interface GamePlugin {
     GameDescriptor getDescriptor();
 
     /**
-     * Creates a new instance of the game rules.
+     * Creates a new instance of the game logic.
      * 
      * <p>
      * This method is called when starting a new game. It should return
-     * a fresh instance of the game rules in initial state.
+     * a fresh instance of the game in initial state.
      * </p>
      * 
-     * @return new game rules instance (never null)
+     * @return new game instance (never null)
      */
-    GameRules createRules();
+    GameInterface createRules();
 
     /**
      * Creates a new game panel for UI rendering.
@@ -114,9 +112,9 @@ public interface GamePlugin {
      * </ul>
      * </p>
      * 
-     * @param rules the game rules instance to visualize
+     * @param game the game instance to visualize
      * @return new game panel (never null)
-     * @throws IllegalArgumentException if rules is null or wrong type
+     * @throws IllegalArgumentException if game is null or wrong type
      */
-    GamePanel createPanel(GameRules rules);
+    GamePanel createPanel(GameInterface game);
 }

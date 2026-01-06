@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
 package org.jgame.plugin.impl;
 
-import org.jgame.logic.engine.GameRules;
+import org.jgame.logic.GameInterface;
 import org.jgame.logic.games.checkers.CheckersMove;
 import org.jgame.logic.games.checkers.CheckersPiece;
 import org.jgame.logic.games.checkers.CheckersRules;
@@ -43,12 +40,12 @@ public class CheckersPanel extends GamePanel {
     private int selectedRow = -1;
     private int selectedCol = -1;
 
-    public CheckersPanel(GameRules rules) {
-        super(rules);
-        if (!(rules instanceof CheckersRules)) {
-            throw new IllegalArgumentException("Rules must be CheckersRules");
+    public CheckersPanel(GameInterface game) {
+        super(game);
+        if (!(game instanceof CheckersRules)) {
+            throw new IllegalArgumentException("Game must be CheckersRules");
         }
-        this.checkersRules = (CheckersRules) rules;
+        this.checkersRules = (CheckersRules) game;
     }
 
     @Override
@@ -89,7 +86,8 @@ public class CheckersPanel extends GamePanel {
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font("Arial", Font.BOLD, 16));
         String status = checkersRules.isFinished()
-                ? "Game Over - Winner: Player " + checkersRules.getWinnerId()
+                ? "Game Over - Winner: "
+                        + (checkersRules.getWinner() != null ? checkersRules.getWinner().getName() : "None")
                 : "Turn: Player " + checkersRules.getCurrentPlayer();
         g2d.drawString(status, 20, 30);
     }

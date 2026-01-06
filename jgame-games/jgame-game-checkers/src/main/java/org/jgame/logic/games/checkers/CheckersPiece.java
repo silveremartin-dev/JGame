@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,17 +20,17 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
 package org.jgame.logic.games.checkers;
+
+import org.jgame.parts.PieceInterface;
+import java.awt.Image;
 
 /**
  * Represents a single checkers piece on the board.
  * Tracks the piece's owner, position, and king status.
  */
-public class CheckersPiece {
+public class CheckersPiece implements PieceInterface {
     private final int player; // 1 or 2
     private boolean isKing; // false = regular piece, true = king
     private int row; // 0-7
@@ -79,5 +79,15 @@ public class CheckersPiece {
     public String toString() {
         String type = isKing ? "K" : "P";
         return "Player" + player + type + "(" + row + "," + col + ")";
+    }
+
+    @Override
+    public String getName() {
+        return toString();
+    }
+
+    @Override
+    public Image getImage(Image image) {
+        return image;
     }
 }

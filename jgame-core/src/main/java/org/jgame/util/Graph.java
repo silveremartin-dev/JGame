@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
-
 package org.jgame.util;
-
 
 import org.jetbrains.annotations.NotNull;
 
@@ -34,17 +29,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-public class Graph {
-	
-	private final HashSet<NodeInterface> nodes;
+public class Graph<N extends NodeInterface> {
+
+	private final HashSet<N> nodes;
 	private final HashSet<Edge> edges;
-	
+
 	public Graph() {
-		nodes = new HashSet<NodeInterface>();
+		nodes = new HashSet<N>();
 		edges = new HashSet<Edge>();
 	}
 
-	public Set<NodeInterface> getNodes() {
+	public Set<N> getNodes() {
 		return nodes;
 	}
 
@@ -52,7 +47,7 @@ public class Graph {
 		return edges;
 	}
 
-	public boolean existsEdge(@NotNull NodeInterface source, @NotNull NodeInterface destination) {
+	public boolean existsEdge(@NotNull N source, @NotNull N destination) {
 		boolean found;
 		Iterator<Edge> edgesIterator;
 		Edge currentEdge;
@@ -65,50 +60,56 @@ public class Graph {
 		return found;
 	}
 
+	@SuppressWarnings("unchecked")
 	public boolean addEdge(@NotNull Edge edge) {
-		if (!existsEdge(edge.getSource(), edge.getDestination())) {
-			nodes.add(edge.getSource());
-			nodes.add(edge.getDestination());
+		N source = (N) edge.getSource();
+		N destination = (N) edge.getDestination();
+		if (!existsEdge(source, destination)) {
+			nodes.add(source);
+			nodes.add(destination);
 			return edges.add(edge);
-		} else throw new IllegalArgumentException("Edge with sema source and destination already exists in graph.");
+		} else
+			throw new IllegalArgumentException("Edge with same source and destination already exists in graph.");
 	}
 
 	public boolean removeEdge(Edge edge) {
-		//don't remove nodes even if they get not connected
+		// don't remove nodes even if they get not connected
 		return edges.remove(edge);
 	}
 
-	public Set<Edge> getInputEdges(@NotNull NodeInterface node) {
+	public Set<Edge> getInputEdges(@NotNull N node) {
 		HashSet<Edge> resultEdges;
 		resultEdges = new HashSet<>();
 		if (nodes.contains(node)) {
-			for(Edge e : edges) {
+			for (Edge e : edges) {
 				if (e.getDestination().equals(node)) {
 					resultEdges.add(e);
 				}
 			}
 			return resultEdges;
-		} else throw new IllegalArgumentException("Node doesn't belong to graph.");
+		} else
+			throw new IllegalArgumentException("Node doesn't belong to graph.");
 	}
 
-	public Set<Edge> getOutputEdges(@NotNull NodeInterface node) {
+	public Set<Edge> getOutputEdges(@NotNull N node) {
 		HashSet<Edge> resultEdges;
 		resultEdges = new HashSet<>();
 		if (nodes.contains(node)) {
-			for(Edge e : edges) {
+			for (Edge e : edges) {
 				if (e.getSource().equals(node)) {
 					resultEdges.add(e);
 				}
 			}
 			return resultEdges;
-		} else throw new IllegalArgumentException("Node doesn't belong to graph.");
+		} else
+			throw new IllegalArgumentException("Node doesn't belong to graph.");
 	}
 
-	public boolean addNode(@NotNull NodeInterface node) {
+	public boolean addNode(@NotNull N node) {
 		return nodes.add(node);
 	}
 
-	public boolean removeNode(@NotNull NodeInterface node) {
+	public boolean removeNode(@NotNull N node) {
 		edges.removeAll(getInputEdges(node));
 		edges.removeAll(getOutputEdges(node));
 		return nodes.remove(node);

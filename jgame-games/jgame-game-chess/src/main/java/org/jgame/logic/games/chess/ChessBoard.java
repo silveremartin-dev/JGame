@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,16 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
 package org.jgame.logic.games.chess;
 
+import org.jgame.parts.boards.AbstractBoard;
+import org.jgame.parts.PieceInterface;
+import org.jgame.parts.TileInterface;
+import org.jgame.parts.BoardInterface;
+import org.jgame.util.Graph;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 /**
  * Chess board representation.
@@ -38,7 +41,7 @@ import java.util.Arrays;
  * @author Silvere Martin-Michiellot
  * @version 1.0
  */
-public class ChessBoard {
+public class ChessBoard extends AbstractBoard {
 
     private final ChessPiece[][] board = new ChessPiece[8][8];
 
@@ -219,5 +222,28 @@ public class ChessBoard {
             }
         }
         return total;
+    }
+
+    @Override
+    public int getType() {
+        return BoardInterface.SQUARE;
+    }
+
+    @Override
+    public Graph<? extends TileInterface> getAllTiles() {
+        return null;
+    }
+
+    @Override
+    public java.util.List<PieceInterface> getPieces() {
+        java.util.List<PieceInterface> pieces = new ArrayList<>();
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                if (board[row][col] != null) {
+                    pieces.add(board[row][col]);
+                }
+            }
+        }
+        return pieces;
     }
 }

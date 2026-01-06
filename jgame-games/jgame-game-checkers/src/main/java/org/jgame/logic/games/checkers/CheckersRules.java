@@ -1,33 +1,9 @@
-/*
- * MIT License
- *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
- */
-
 package org.jgame.logic.games.checkers;
 
-import org.jgame.logic.engine.GameRules;
+import org.jgame.logic.games.AbstractBoardGame;
 import org.jgame.model.GameUser;
+import org.jgame.parts.PlayerInterface;
+import org.jgame.parts.BoardInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,17 +11,14 @@ import java.util.List;
 /**
  * Implementation of American Checkers (Draughts) rules.
  */
-public class CheckersRules extends GameRules {
+public class CheckersRules extends AbstractBoardGame {
 
-    // Board representation: 8x8 grid, null = empty square
-    private CheckersPiece[][] board;
+    // Board representation using CheckersBoard
+    private final CheckersBoard board;
 
     // Piece tracking
     private List<CheckersPiece> player1Pieces;
     private List<CheckersPiece> player2Pieces;
-
-    // Players
-    private List<GameUser> players;
 
     // Game state
     private int currentPlayer; // 1 or 2
@@ -55,7 +28,8 @@ public class CheckersRules extends GameRules {
     private boolean multiJumpInProgress; // For continuing multi-jump chains
 
     public CheckersRules() {
-        this.players = new ArrayList<>();
+        super("Checkers", "1.0", "American Checkers");
+        this.board = new CheckersBoard();
         initGame();
     }
 
@@ -63,7 +37,7 @@ public class CheckersRules extends GameRules {
      * Initializes a new game of checkers with standard setup.
      */
     public void initGame() {
-        board = new CheckersPiece[8][8];
+        // Board is already created in constructor, but we fill it
         player1Pieces = new ArrayList<>();
         player2Pieces = new ArrayList<>();
         currentPlayer = 1;
@@ -76,9 +50,18 @@ public class CheckersRules extends GameRules {
             for (int col = 0; col < 8; col++) {
                 if (isDarkSquare(row, col)) {
                     CheckersPiece piece = new CheckersPiece(1, row, col);
-                    board[row][col] = piece;
+                    board.setPiece(row, col, piece);
                     player1Pieces.add(piece);
+                } else {
+                    board.setPiece(row, col, null);
                 }
+            }
+        }
+
+        // Empty rows 3-4
+        for (int row = 3; row < 5; row++) {
+            for (int col = 0; col < 8; col++) {
+                board.setPiece(row, col, null);
             }
         }
 
@@ -87,8 +70,10 @@ public class CheckersRules extends GameRules {
             for (int col = 0; col < 8; col++) {
                 if (isDarkSquare(row, col)) {
                     CheckersPiece piece = new CheckersPiece(2, row, col);
-                    board[row][col] = piece;
+                    board.setPiece(row, col, piece);
                     player2Pieces.add(piece);
+                } else {
+                    board.setPiece(row, col, null);
                 }
             }
         }
@@ -96,14 +81,33 @@ public class CheckersRules extends GameRules {
 
     @Override
     public void addPlayer(GameUser player) {
-        if (players.size() < 2) {
-            players.add(player);
+        if (getPlayers().size() < 2) {
+            super.addPlayer(player);
         }
     }
 
+    public List<GameUser> getGameUsers() {
+        List<GameUser> users = new ArrayList<>();
+        for (PlayerInterface p : super.getPlayers()) {
+            if (p instanceof org.jgame.parts.players.GamePlayer) {
+                users.add(((org.jgame.parts.players.GamePlayer) p).getUser());
+            }
+        }
+        return users;
+    }
+
     @Override
-    public List<GameUser> getPlayers() {
-        return new ArrayList<>(players);
+    public List<PlayerInterface> getPlayers() {
+        return super.getPlayers();
+    }
+
+    @Override
+    public BoardInterface getBoard() {
+        return board;
+    }
+
+    public CheckersBoard getCheckersBoard() {
+        return board;
     }
 
     @Override
@@ -112,23 +116,11 @@ public class CheckersRules extends GameRules {
     }
 
     @Override
-    public GameUser getWinner() {
-        if (winnerId > 0 && winnerId <= players.size()) {
-            return players.get(winnerId - 1);
+    public PlayerInterface getWinner() {
+        if (winnerId > 0 && winnerId <= getPlayers().size()) {
+            return getPlayers().get(winnerId - 1);
         }
         return null;
-    }
-
-    public String getGameName() {
-        return "Checkers";
-    }
-
-    public int getMinPlayers() {
-        return 2;
-    }
-
-    public int getMaxPlayers() {
-        return 2;
     }
 
     public int getWinnerId() {
@@ -165,13 +157,13 @@ public class CheckersRules extends GameRules {
         }
 
         // Check source has a piece belonging to current player
-        CheckersPiece piece = board[fromRow][fromCol];
+        CheckersPiece piece = board.getPiece(fromRow, fromCol);
         if (piece == null || piece.getPlayer() != currentPlayer) {
             return false;
         }
 
         // Check destination is empty
-        if (board[toRow][toCol] != null) {
+        if (board.getPiece(toRow, toCol) != null) {
             return false;
         }
 
@@ -199,7 +191,7 @@ public class CheckersRules extends GameRules {
         if (rowDiff == 2) {
             int midRow = (fromRow + toRow) / 2;
             int midCol = (fromCol + toCol) / 2;
-            CheckersPiece captured = board[midRow][midCol];
+            CheckersPiece captured = board.getPiece(midRow, midCol);
 
             // Must have opponent piece to capture
             if (captured == null || captured.getPlayer() == piece.getPlayer()) {
@@ -330,11 +322,11 @@ public class CheckersRules extends GameRules {
         int toRow = move.getToRow();
         int toCol = move.getToCol();
 
-        CheckersPiece piece = board[fromRow][fromCol];
+        CheckersPiece piece = board.getPiece(fromRow, fromCol);
 
         // Move the piece
-        board[toRow][toCol] = piece;
-        board[fromRow][fromCol] = null;
+        board.setPiece(toRow, toCol, piece);
+        board.setPiece(fromRow, fromCol, null);
         piece.setPosition(toRow, toCol);
 
         boolean turnComplete = true;
@@ -343,10 +335,10 @@ public class CheckersRules extends GameRules {
         if (move.isCapture()) {
             int midRow = (fromRow + toRow) / 2;
             int midCol = (fromCol + toCol) / 2;
-            CheckersPiece captured = board[midRow][midCol];
+            CheckersPiece captured = board.getPiece(midRow, midCol);
 
             // Remove captured piece
-            board[midRow][midCol] = null;
+            board.setPiece(midRow, midCol, null);
             if (captured.getPlayer() == 1) {
                 player1Pieces.remove(captured);
             } else {
@@ -407,7 +399,7 @@ public class CheckersRules extends GameRules {
     public CheckersPiece getPiece(int row, int col) {
         if (!inBounds(row, col))
             return null;
-        return board[row][col];
+        return board.getPiece(row, col);
     }
 
     public CheckersPiece getPieceAt(int row, int col) {
@@ -443,7 +435,7 @@ public class CheckersRules extends GameRules {
         for (int row = 0; row < 8; row++) {
             sb.append(row).append(" ");
             for (int col = 0; col < 8; col++) {
-                CheckersPiece piece = board[row][col];
+                CheckersPiece piece = board.getPiece(row, col);
                 if (piece == null) {
                     sb.append(isDarkSquare(row, col) ? "· " : "  ");
                 } else {
@@ -455,5 +447,17 @@ public class CheckersRules extends GameRules {
             sb.append("\n");
         }
         return sb.toString();
+    }
+
+    public String getGameName() {
+        return "Checkers";
+    }
+
+    public int getMinPlayers() {
+        return 2;
+    }
+
+    public int getMaxPlayers() {
+        return 2;
     }
 }

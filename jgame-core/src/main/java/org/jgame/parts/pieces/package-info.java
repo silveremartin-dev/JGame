@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,22 +20,28 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
-
 /**
- *
- * Puzzle piece (each different),
- * card (ace to king),
- * checkers (pawn, tower, quen, king),
- * draught (black, white black queen, white queen)
- * monopoly (racecar, ...)
- * oware (pea)
- * coin
- *
+ * Game piece implementations.
+ * 
+ * <p>
+ * Abstract game piece implementations including movable pieces, cards, tokens,
+ * and domino tiles. All pieces implement
+ * {@link org.jgame.parts.PieceInterface}.
+ * </p>
+ * 
+ * <h2>Components</h2>
+ * <ul>
+ * <li>{@link org.jgame.parts.pieces.AbstractMovablePiece} - Base for movable
+ * pieces (Chess, Checkers)</li>
+ * <li>{@link org.jgame.parts.pieces.AbstractCard} - Base for card pieces</li>
+ * <li>{@link org.jgame.parts.pieces.AbstractToken} - Base for token pieces</li>
+ * <li>{@link org.jgame.parts.pieces.DominoTile} - Domino tile
+ * implementation</li>
+ * </ul>
+ * 
  * @since 1.0
- * @version 1.0
+ * @version 2.0
+ * @see org.jgame.parts.PieceInterface
  */
 package org.jgame.parts.pieces;

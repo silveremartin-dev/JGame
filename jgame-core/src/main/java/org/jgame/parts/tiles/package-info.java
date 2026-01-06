@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,26 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
-
 /**
- *
+ * Tile implementations for board positions.
+ * 
+ * <p>
+ * Tile implementations representing positions on game boards including
+ * square tiles for grid-based boards and hexagonal tiles for hex-grid boards.
+ * </p>
+ * 
+ * <h2>Components</h2>
+ * <ul>
+ * <li>{@link org.jgame.parts.tiles.AbstractSquareTile} - Square tile for grid
+ * boards</li>
+ * <li>{@link org.jgame.parts.tiles.AbstractHexagonalTile} - Hexagonal tile for
+ * hex boards</li>
+ * </ul>
+ * 
  * @since 1.0
- * @version 1.0
+ * @version 2.0
+ * @see org.jgame.parts.TileInterface
+ * @see org.jgame.parts.boards
  */
 package org.jgame.parts.tiles;

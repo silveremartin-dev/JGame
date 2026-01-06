@@ -1,13 +1,9 @@
-/*
- * MIT License
- *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
- */
-
 package org.jgame.logic.games.chess;
 
-import org.jgame.logic.engine.GameRules;
+import org.jgame.logic.games.AbstractBoardGame;
 import org.jgame.model.GameUser;
+import org.jgame.parts.PlayerInterface;
+import org.jgame.parts.BoardInterface;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,31 +11,43 @@ import java.util.List;
 /**
  * Chess game rules implementation.
  */
-public class ChessRules extends GameRules {
+public class ChessRules extends AbstractBoardGame {
 
     private final ChessBoard board;
-    private final List<GameUser> players;
+    // players in AbstractGame
     private ChessPiece.Color currentTurn;
     private boolean gameFinished;
-    private GameUser winner;
+    private PlayerInterface winner;
 
     public ChessRules() {
+        super("Chess", "1.0", "Standard Chess Game");
         this.board = new ChessBoard();
-        this.players = new ArrayList<>();
         this.currentTurn = ChessPiece.Color.WHITE;
         this.gameFinished = false;
     }
 
     @Override
     public void addPlayer(GameUser player) {
-        if (players.size() < 2) {
-            players.add(player);
+        if (getPlayers().size() < 2) {
+            super.addPlayer(player);
+            // Player index 0 = White, index 1 = Black (implicit by turn order)
         }
     }
 
+    public List<GameUser> getGameUsers() {
+        List<GameUser> users = new ArrayList<>();
+        for (PlayerInterface p : super.getPlayers()) {
+            if (p instanceof org.jgame.parts.players.GamePlayer) {
+                users.add(((org.jgame.parts.players.GamePlayer) p).getUser());
+            }
+        }
+        return users;
+    }
+
+    // AbstractMethod from AbstractBoardGame
     @Override
-    public List<GameUser> getPlayers() {
-        return new ArrayList<>(players);
+    public BoardInterface getBoard() {
+        return board;
     }
 
     @Override
@@ -48,12 +56,8 @@ public class ChessRules extends GameRules {
     }
 
     @Override
-    public GameUser getWinner() {
+    public PlayerInterface getWinner() {
         return winner;
-    }
-
-    public ChessBoard getBoard() {
-        return board;
     }
 
     public ChessPiece.Color getCurrentTurn() {
@@ -203,10 +207,10 @@ public class ChessRules extends GameRules {
 
         if (!whiteKingExists) {
             gameFinished = true;
-            winner = players.size() > 1 ? players.get(1) : null;
+            winner = super.getPlayers().size() > 1 ? super.getPlayers().get(1) : null;
         } else if (!blackKingExists) {
             gameFinished = true;
-            winner = players.size() > 0 ? players.get(0) : null;
+            winner = super.getPlayers().size() > 0 ? super.getPlayers().get(0) : null;
         }
     }
 

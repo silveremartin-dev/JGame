@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +20,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
 package org.jgame.logic.games.chess;
+
+import org.jgame.parts.PieceInterface;
 
 /**
  * Chess piece types using sealed interface (Java 17+).
@@ -37,7 +36,7 @@ package org.jgame.logic.games.chess;
  * @author Silvere Martin-Michiellot
  * @version 1.0
  */
-public sealed interface ChessPiece
+public sealed interface ChessPiece extends PieceInterface
         permits Pawn, Knight, Bishop, Rook, Queen, King {
 
     /**

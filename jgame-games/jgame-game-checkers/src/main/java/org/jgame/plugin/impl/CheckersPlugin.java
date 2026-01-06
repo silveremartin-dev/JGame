@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
 package org.jgame.plugin.impl;
 
-import org.jgame.logic.engine.GameRules;
+import org.jgame.logic.GameInterface;
 import org.jgame.logic.games.checkers.CheckersRules;
 import org.jgame.plugin.GameDescriptor;
 import org.jgame.plugin.GamePlugin;
@@ -59,15 +56,15 @@ public class CheckersPlugin implements GamePlugin {
     }
 
     @Override
-    public GameRules createRules() {
+    public GameInterface createRules() {
         return new CheckersRules();
     }
 
     @Override
-    public GamePanel createPanel(GameRules rules) {
-        if (rules instanceof CheckersRules checkersRules) {
+    public GamePanel createPanel(GameInterface game) {
+        if (game instanceof CheckersRules checkersRules) {
             return new CheckersPanel(checkersRules);
         }
-        throw new IllegalArgumentException("Rules must be CheckersRules");
+        throw new IllegalArgumentException("Game must be CheckersRules");
     }
 }

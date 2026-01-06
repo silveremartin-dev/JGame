@@ -1,58 +1,36 @@
-/*
- * MIT License
- *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
- */
-
 package org.jgame.logic.games.goose;
 
-import org.jgame.logic.ActionInterface;
-import org.jgame.logic.Gameplay;
-import org.jgame.logic.engine.GameRules;
-import org.jgame.logic.scores.DoubleScore;
+import org.jgame.logic.games.AbstractBoardGame;
+import org.jgame.logic.scores.IntScore;
 import org.jgame.parts.PlayerInterface;
+import org.jgame.parts.BoardInterface;
 import org.jgame.parts.boards.AbstractLineBoard;
+import org.jgame.parts.players.GamePlayer;
 import org.jgame.parts.players.AbstractPlayer;
 import org.jgame.parts.tiles.AbstractSquareTile;
 import org.jgame.model.GameUser;
 import org.jgame.util.Graph;
-import org.jgame.util.RandomGenerator;
+import org.jgame.parts.dice.Die;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class GooseRules extends GameRules {
+public class GooseRules extends AbstractBoardGame {
 
     public static final int CAN_MOVE = 2;
     public static final int LOSE_ONE_TURN = 4;
     public static final int NO_MOVE = 8;
     public static final int WINNER = 16;
 
-    private Graph board;
-    private List<AbstractPlayer> players;
-    private List<GameUser> gameUsers; // Store original GameUsers
+    // Dice from parts
+    private final Die die1 = Die.D6; // Use static D6 as it's standard
+    private final Die die2 = Die.D6; // Or new Die(6) if we want separate instances, but D6 is stateless (random
+                                     // based)
+
+    private Graph<GooseSquareTile> board;
+    // players list is in AbstractGame
     private int[] playOrder;
     private int[] inGameState;
     private int turnNumber;
@@ -61,40 +39,31 @@ public class GooseRules extends GameRules {
     private List<Integer> lastDiceRoll; // Store last dice roll for release mechanism
     private boolean gameStarted = false;
     private boolean gameFinished = false;
-    private GameUser winner = null;
+    private PlayerInterface winner = null;
 
     public GooseRules() {
-        this.players = new ArrayList<>();
-        this.gameUsers = new ArrayList<>();
+        super("Game of the Goose", "1.0", "A classic race game");
+        // players initialized in super
     }
 
     @Override
-    public void addPlayer(GameUser player) {
+    public void addPlayer(org.jgame.parts.PlayerInterface player) {
         if (gameStarted) {
             throw new IllegalStateException("Cannot add players after game has started");
         }
-        gameUsers.add(player);
-
-        AbstractPlayer abstractPlayer = new AbstractPlayer() {
-            @Override
-            public List<ActionInterface> computeNextActions(Gameplay gameplay) {
-                return null;
-            }
-        };
-        abstractPlayer.setType(AbstractPlayer.BIOLOGICAL);
-        abstractPlayer.setId(player.getLogin() != null ? player.getLogin() : "unknown");
-        abstractPlayer.setState(PlayerInterface.START_STATE);
-        abstractPlayer.setScore(new DoubleScore(1));
-        players.add(abstractPlayer);
+        super.addPlayer(player);
+        if (player instanceof AbstractPlayer) {
+            ((AbstractPlayer) player).setType(PlayerInterface.BIOLOGICAL);
+            ((AbstractPlayer) player).setState(PlayerInterface.START_STATE);
+            ((AbstractPlayer) player).setScore(new IntScore(1));
+        }
     }
 
+    // Override helper to ensure correct initialization if called with GameUser
     @Override
-    public List<GameUser> getPlayers() {
-        return new ArrayList<>(gameUsers);
-    }
-
-    public List<AbstractPlayer> getAbstractPlayers() {
-        return players;
+    public void addPlayer(GameUser user) {
+        GamePlayer player = new GamePlayer(user);
+        addPlayer(player);
     }
 
     @Override
@@ -103,12 +72,8 @@ public class GooseRules extends GameRules {
     }
 
     @Override
-    public GameUser getWinner() {
+    public PlayerInterface getWinner() {
         return winner;
-    }
-
-    public String getGameName() {
-        return "Game of the Goose";
     }
 
     public int getMinPlayers() {
@@ -124,7 +89,7 @@ public class GooseRules extends GameRules {
     }
 
     public void startGame() {
-        if (players.size() < 2) {
+        if (getPlayers().size() < 2) {
             throw new IllegalStateException("Need at least 2 players");
         }
         gameStarted = true;
@@ -133,7 +98,7 @@ public class GooseRules extends GameRules {
 
         // Initialize game state
         try {
-            initGame(players.size());
+            initGame(getPlayers().size());
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize game", e);
         }
@@ -141,26 +106,37 @@ public class GooseRules extends GameRules {
 
     public void endGame() {
         gameFinished = true;
-        for (AbstractPlayer player : players) {
-            player.setState(PlayerInterface.END_STATE);
+        for (PlayerInterface player : getPlayers()) {
+            if (player instanceof AbstractPlayer) {
+                ((AbstractPlayer) player).setState(PlayerInterface.END_STATE);
+            }
         }
     }
 
     // --- Original Goose Logic ---
 
     @SuppressWarnings("unchecked")
-    private Graph generateBoard() throws InvocationTargetException, InstantiationException, IllegalAccessException {
-        board = AbstractLineBoard.generateBoard(63, (Class<AbstractSquareTile>) (Class<?>) GooseSquareTile.class);
+    private Graph<GooseSquareTile> generateBoard()
+            throws InvocationTargetException, InstantiationException, IllegalAccessException {
+        board = (Graph<GooseSquareTile>) (Graph<?>) AbstractLineBoard.generateBoard(63,
+                (Class<AbstractSquareTile>) (Class<?>) GooseSquareTile.class);
         return board;
     }
 
-    public Graph getBoard() {
+    @Override
+    public BoardInterface getBoard() {
+        // Goose uses Graph-based board via getGraphBoard(); BoardInterface not
+        // applicable
+        return null;
+    }
+
+    public Graph<GooseSquareTile> getGraphBoard() {
         return board;
     }
 
     private int[] generatePlayOrder() {
-        int[] playTurn = new int[players.size()];
-        for (int i = 0; i < players.size(); i++) {
+        int[] playTurn = new int[getPlayers().size()];
+        for (int i = 0; i < getPlayers().size(); i++) {
             playTurn[i] = i + 1;
         }
         // Shuffle
@@ -176,8 +152,8 @@ public class GooseRules extends GameRules {
     }
 
     private int[] generateInGameState() {
-        int[] gameState = new int[players.size()];
-        for (int i = 0; i < players.size(); i++) {
+        int[] gameState = new int[getPlayers().size()];
+        for (int i = 0; i < getPlayers().size(); i++) {
             gameState[i] = CAN_MOVE;
         }
         inGameState = gameState;
@@ -187,7 +163,6 @@ public class GooseRules extends GameRules {
     public void initGame(int numPlayers)
             throws InvocationTargetException, InstantiationException, IllegalAccessException {
         generateBoard();
-        // generatePlayers is handled by addPlayer now
         generatePlayOrder();
         generateInGameState();
 
@@ -200,6 +175,10 @@ public class GooseRules extends GameRules {
 
     public void nextTurn() {
         if (gameFinished)
+            return;
+
+        // Safety check for empty players
+        if (getPlayers().isEmpty())
             return;
 
         if (inGameState[turnIndex] == WINNER) {
@@ -233,9 +212,12 @@ public class GooseRules extends GameRules {
                 checkReleaseFromWellOrPrison(newPos, turnIndex, currentPos);
             }
 
-            // Update position
+            // Update position (using IntScore for persistence)
             playerPositions[turnIndex] = newPos;
-            players.get(turnIndex).setScore(new DoubleScore(newPos));
+            PlayerInterface p = getPlayers().get(turnIndex);
+            if (p instanceof AbstractPlayer) {
+                ((AbstractPlayer) p).setScore(new IntScore(newPos));
+            }
 
         } else if (inGameState[turnIndex] == LOSE_ONE_TURN) {
             // Skip turn, reset to CAN_MOVE
@@ -245,7 +227,7 @@ public class GooseRules extends GameRules {
 
         // Move to next player
         turnIndex++;
-        if (turnIndex == players.size()) {
+        if (turnIndex == getPlayers().size()) {
             turnIndex = 0;
             turnNumber++;
         }
@@ -283,7 +265,7 @@ public class GooseRules extends GameRules {
             case 63: // Winner
                 inGameState[playerIndex] = WINNER;
                 gameFinished = true;
-                // winner = players.get(playerIndex); // Need mapping to GameUser
+                winner = getPlayers().get(playerIndex);
                 return position;
             default:
                 return handleGooseSquares(position, diceSum, playerIndex);
@@ -301,12 +283,15 @@ public class GooseRules extends GameRules {
     }
 
     private void checkReleaseFromWellOrPrison(int landingPosition, int currentPlayerIndex, int oldPosition) {
-        for (int i = 0; i < players.size(); i++) {
+        // Need to iterate players, but avoid current
+        for (int i = 0; i < getPlayers().size(); i++) {
             if (i != currentPlayerIndex) {
                 if (playerPositions[i] == landingPosition && inGameState[i] == NO_MOVE) {
                     inGameState[i] = CAN_MOVE;
                     playerPositions[i] = oldPosition;
-                    players.get(i).setScore(new DoubleScore(oldPosition));
+                    if (getPlayers().get(i) instanceof AbstractPlayer) {
+                        ((AbstractPlayer) getPlayers().get(i)).setScore(new IntScore(oldPosition));
+                    }
                     inGameState[currentPlayerIndex] = NO_MOVE;
                     break;
                 }
@@ -315,7 +300,12 @@ public class GooseRules extends GameRules {
     }
 
     public List<Integer> rollTwo6Dices() {
-        return RandomGenerator.rollDices(6, 2);
+        int val1 = die1.roll();
+        int val2 = die2.roll();
+        List<Integer> rolls = new ArrayList<>();
+        rolls.add(val1);
+        rolls.add(val2);
+        return rolls;
     }
 
     // Getters for testing
@@ -340,5 +330,9 @@ public class GooseRules extends GameRules {
             return 1; // Default start position
         }
         return playerPositions[playerIndex];
+    }
+
+    public String getGameName() {
+        return "Game of the Goose";
     }
 }

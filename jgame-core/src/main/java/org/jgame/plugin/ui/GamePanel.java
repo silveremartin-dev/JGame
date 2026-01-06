@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
 package org.jgame.plugin.ui;
 
-import org.jgame.logic.engine.GameRules;
+import org.jgame.logic.GameInterface;
 
 import javax.swing.*;
 import java.awt.*;
@@ -52,26 +49,27 @@ import java.awt.event.MouseEvent;
  * 
  * @author Silvere Martin-Michiellot
  * @version 1.0
+ * @author Google Gemini (Antigravity)
  */
 public abstract class GamePanel extends JPanel {
 
-    /** The game rules this panel visualizes */
-    protected final GameRules rules;
+    /** The game instance this panel visualizes */
+    protected final GameInterface game;
 
     /** Preferred panel size */
     protected static final Dimension DEFAULT_SIZE = new Dimension(600, 600);
 
     /**
-     * Creates a new game panel for the given rules.
+     * Creates a new game panel for the given game.
      * 
-     * @param rules the game rules to visualize
-     * @throws IllegalArgumentException if rules is null
+     * @param game the game to visualize
+     * @throws IllegalArgumentException if game is null
      */
-    protected GamePanel(GameRules rules) {
-        if (rules == null) {
-            throw new IllegalArgumentException("Game rules cannot be null");
+    protected GamePanel(GameInterface game) {
+        if (game == null) {
+            throw new IllegalArgumentException("Game instance cannot be null");
         }
-        this.rules = rules;
+        this.game = game;
 
         setPreferredSize(DEFAULT_SIZE);
         setBackground(Color.WHITE);
@@ -144,11 +142,11 @@ public abstract class GamePanel extends JPanel {
     }
 
     /**
-     * Gets the game rules associated with this panel.
+     * Gets the game instance associated with this panel.
      * 
-     * @return game rules instance
+     * @return game instance
      */
-    public GameRules getRules() {
-        return rules;
+    public GameInterface getGame() {
+        return game;
     }
 }

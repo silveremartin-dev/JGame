@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,10 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
 package org.jgame.parts.boards;
 
 import org.jetbrains.annotations.NotNull;
@@ -31,14 +28,13 @@ import org.jgame.parts.BoardInterface;
 import org.jgame.parts.tiles.AbstractSquareTile;
 import org.jgame.util.Edge;
 import org.jgame.util.Graph;
-import org.jgame.util.NodeInterface;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public abstract class AbstractSquareBoard implements BoardInterface {
 
-    private Graph tiles;
+    private Graph<AbstractSquareTile> tiles;
 
     @Override
     public int getType() {
@@ -46,24 +42,24 @@ public abstract class AbstractSquareBoard implements BoardInterface {
     }
 
     @Override
-    public Graph getAllTiles() {
+    public Graph<AbstractSquareTile> getAllTiles() {
         return tiles;
     }
 
-    public void setAllTiles(@NotNull Graph tiles) {
+    public void setAllTiles(@NotNull Graph<AbstractSquareTile> tiles) {
         this.tiles = tiles;
     }
 
-    public static Graph generateBoard(int size, @NotNull Class<AbstractSquareTile> tileClass)
+    public static Graph<AbstractSquareTile> generateBoard(int size, @NotNull Class<AbstractSquareTile> tileClass)
             throws InvocationTargetException, InstantiationException, IllegalAccessException {
         if (size > 0) {
-            Graph resultGraph;
-            NodeInterface[] nodeArray;
+            Graph<AbstractSquareTile> resultGraph;
+            AbstractSquareTile[] nodeArray;
             Constructor<AbstractSquareTile>[] constructors;
             AbstractSquareTile tileObject;
             Edge currentEdge;
-            resultGraph = new Graph();
-            nodeArray = new NodeInterface[size * size];
+            resultGraph = new Graph<>();
+            nodeArray = new AbstractSquareTile[size * size];
             @SuppressWarnings("unchecked")
             Constructor<AbstractSquareTile>[] typedConstructors = (Constructor<AbstractSquareTile>[]) tileClass
                     .getConstructors();

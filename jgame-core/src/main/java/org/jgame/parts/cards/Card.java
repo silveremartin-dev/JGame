@@ -1,11 +1,13 @@
-package org.jgame.logic.cards;
+package org.jgame.parts.cards;
+
+import org.jgame.parts.pieces.AbstractCard;
 
 import java.util.Objects;
 
 /**
  * Represents a playing card.
  */
-public class Card {
+public class Card extends AbstractCard {
     private final Suit suit;
     private final Rank rank;
     private boolean isFaceUp;
@@ -14,6 +16,7 @@ public class Card {
         this.suit = suit;
         this.rank = rank;
         this.isFaceUp = false; // Default face down
+        setName(rank.getSymbol() + suit.getSymbol());
     }
 
     public Suit getSuit() {

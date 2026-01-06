@@ -1,11 +1,29 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
-
 package org.jgame.plugin.impl;
 
+import org.jgame.logic.GameInterface;
 import org.jgame.logic.games.chess.*;
 import org.jgame.plugin.ui.GamePanel;
 
@@ -20,9 +38,12 @@ public class ChessPanel extends GamePanel {
     private int selectedRow = -1;
     private int selectedCol = -1;
 
-    public ChessPanel(ChessRules rules) {
-        super(rules);
-        this.chessRules = rules;
+    public ChessPanel(GameInterface game) {
+        super(game);
+        if (!(game instanceof ChessRules)) {
+            throw new IllegalArgumentException("Game must be ChessRules");
+        }
+        this.chessRules = (ChessRules) game;
     }
 
     @Override
@@ -33,6 +54,8 @@ public class ChessPanel extends GamePanel {
         int boardSize = squareSize * 8;
         int offsetX = (width - boardSize) / 2;
         int offsetY = (height - boardSize) / 2;
+
+        ChessBoard board = (ChessBoard) chessRules.getBoard();
 
         // Draw board
         for (int row = 0; row < 8; row++) {
@@ -52,7 +75,7 @@ public class ChessPanel extends GamePanel {
                 }
 
                 // Draw piece
-                ChessPiece piece = chessRules.getBoard().getPiece(row, col);
+                ChessPiece piece = board.getPiece(row, col);
                 if (piece != null) {
                     drawPiece(g2d, piece, x, y, squareSize);
                 }
@@ -63,7 +86,7 @@ public class ChessPanel extends GamePanel {
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font("Arial", Font.BOLD, 16));
         String status = chessRules.isFinished()
-                ? "Game Over - Winner: " + (chessRules.getWinner() != null ? chessRules.getWinner().getLogin() : "Draw")
+                ? "Game Over - Winner: " + (chessRules.getWinner() != null ? chessRules.getWinner().getName() : "Draw")
                 : "Turn: " + chessRules.getCurrentTurn();
         g2d.drawString(status, 20, 30);
     }
@@ -119,9 +142,11 @@ public class ChessPanel extends GamePanel {
         if (row < 0 || row > 7 || col < 0 || col > 7)
             return;
 
+        ChessBoard board = (ChessBoard) chessRules.getBoard();
+
         if (selectedRow == -1) {
             // Select piece
-            ChessPiece piece = chessRules.getBoard().getPiece(row, col);
+            ChessPiece piece = board.getPiece(row, col);
             if (piece != null && piece.getColor() == chessRules.getCurrentTurn()) {
                 selectedRow = row;
                 selectedCol = col;

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022-2025 Silvere Martin-Michiellot
+ * Copyright (c) 2022-2025 Silvere Martin-Michiellot, Google Gemini (Antigravity)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,13 +20,10 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Enhanced with AI assistance from Google Gemini (Antigravity)
  */
-
 package org.jgame.plugin.impl;
 
-import org.jgame.logic.engine.GameRules;
+import org.jgame.logic.GameInterface;
 import org.jgame.logic.games.goose.GooseRules;
 import org.jgame.plugin.ui.GamePanel;
 
@@ -51,14 +48,14 @@ public class GoosePanel extends GamePanel {
     /**
      * Creates a new Goose panel.
      * 
-     * @param rules the goose game rules
+     * @param game the goose game instance
      */
-    public GoosePanel(GameRules rules) {
-        super(rules);
-        if (!(rules instanceof GooseRules)) {
-            throw new IllegalArgumentException("Rules must be GooseRules");
+    public GoosePanel(GameInterface game) {
+        super(game);
+        if (!(game instanceof GooseRules)) {
+            throw new IllegalArgumentException("Game must be GooseRules");
         }
-        this.gooseRules = (GooseRules) rules;
+        this.gooseRules = (GooseRules) game;
     }
 
     @Override
@@ -101,7 +98,7 @@ public class GoosePanel extends GamePanel {
 
         // Draw game status
         g2d.setFont(new Font("Arial", Font.PLAIN, 14));
-        g2d.drawString("Players: " + gooseRules.getAbstractPlayers().size(), 20, height - 40);
+        g2d.drawString("Players: " + gooseRules.getPlayers().size(), 20, height - 40);
         g2d.drawString("Status: " + (gooseRules.isFinished() ? "Finished" : "In Progress"),
                 20, height - 20);
     }
