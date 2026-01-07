@@ -8,28 +8,28 @@
 </head>
 <body>
     <header class="header">
-        <div class="logo">🎮 JGame Platform</div>
+        <div class="logo" data-i18n="app_name">🎮 JGame Platform</div>
         <nav class="nav">
-            <a href="#games" class="nav-link active">Games</a>
-            <a href="#scores" class="nav-link">Scores</a>
-            <a href="#settings" class="nav-link">Settings</a>
+            <a href="#games" class="nav-link active" data-i18n="nav_games">Games</a>
+            <a href="#scores" class="nav-link" data-i18n="nav_scores">Scores</a>
+            <a href="#settings" class="nav-link" data-i18n="nav_settings">Settings</a>
         </nav>
         <div class="auth" id="authArea">
-            <button class="btn btn-primary" onclick="showLogin()">Login</button>
-            <button class="btn btn-outline" onclick="showRegister()">Register</button>
+            <button class="btn btn-primary" onclick="showLogin()" data-i18n="auth_login">Login</button>
+            <button class="btn btn-outline" onclick="showRegister()" data-i18n="auth_register">Register</button>
         </div>
     </header>
 
     <main class="main">
         <section id="games" class="section active">
             <div class="section-header">
-                <h2>🎲 Available Games</h2>
+                <h2 data-i18n="games_title">🎲 Available Games</h2>
                 <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Search games..." class="input">
+                    <input type="text" id="searchInput" data-i18n-placeholder="search_placeholder" placeholder="Search games..." class="input">
                     <select id="sortSelect" class="select">
-                        <option value="name">Sort by Name</option>
-                        <option value="rating">Sort by Rating</option>
-                        <option value="players">Sort by Players</option>
+                        <option value="name" data-i18n="sort_name">Sort by Name</option>
+                        <option value="rating" data-i18n="sort_rating">Sort by Rating</option>
+                        <option value="players" data-i18n="sort_players">Sort by Players</option>
                     </select>
                 </div>
             </div>
@@ -39,29 +39,30 @@
         </section>
 
         <section id="scores" class="section">
-            <h2>🏆 Leaderboards</h2>
+            <h2 data-i18n="leaderboards">🏆 Leaderboards</h2>
             <div id="scoresContent">
-                <p class="muted">Login to view your scores</p>
+                <p class="muted" data-i18n="login_prompt">Login to view your scores</p>
             </div>
         </section>
 
         <section id="settings" class="section">
-            <h2>⚙️ Settings</h2>
+            <h2 data-i18n="settings_title">⚙️ Settings</h2>
             <div class="settings-form">
                 <div class="form-group">
-                    <label>Server URL</label>
+                    <label data-i18n="server_url">Server URL</label>
                     <input type="text" id="serverUrl" value="http://localhost:8080" class="input">
                 </div>
                 <div class="form-group">
-                    <label>Language</label>
+                    <label data-i18n="language">Language</label>
                     <select id="language" class="select">
                         <option value="en">English</option>
                         <option value="fr">Français</option>
                         <option value="de">Deutsch</option>
                         <option value="es">Español</option>
+                        <option value="zh">中文</option>
                     </select>
                 </div>
-                <button class="btn btn-primary" onclick="saveSettings()">Save</button>
+                <button class="btn btn-primary" onclick="saveSettings()" data-i18n="btn_save">Save</button>
             </div>
         </section>
     </main>
@@ -69,18 +70,18 @@
     <!-- Login Modal -->
     <div class="modal" id="loginModal">
         <div class="modal-content">
-            <h3>Login</h3>
+            <h3 data-i18n="auth_login">Login</h3>
             <div class="form-group">
-                <label>Username</label>
+                <label data-i18n="username">Username</label>
                 <input type="text" id="loginUsername" class="input">
             </div>
             <div class="form-group">
-                <label>Password</label>
+                <label data-i18n="password">Password</label>
                 <input type="password" id="loginPassword" class="input">
             </div>
             <div class="modal-actions">
-                <button class="btn btn-outline" onclick="closeModal('loginModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="login()">Login</button>
+                <button class="btn btn-outline" onclick="closeModal('loginModal')" data-i18n="btn_cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="login()" data-i18n="auth_login">Login</button>
             </div>
         </div>
     </div>
@@ -88,22 +89,22 @@
     <!-- Register Modal -->
     <div class="modal" id="registerModal">
         <div class="modal-content">
-            <h3>Register</h3>
+            <h3 data-i18n="auth_register">Register</h3>
             <div class="form-group">
-                <label>Username</label>
+                <label data-i18n="username">Username</label>
                 <input type="text" id="regUsername" class="input">
             </div>
             <div class="form-group">
-                <label>Email</label>
+                <label data-i18n="email">Email</label>
                 <input type="email" id="regEmail" class="input">
             </div>
             <div class="form-group">
-                <label>Password</label>
+                <label data-i18n="password">Password</label>
                 <input type="password" id="regPassword" class="input">
             </div>
             <div class="modal-actions">
-                <button class="btn btn-outline" onclick="closeModal('registerModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="register()">Register</button>
+                <button class="btn btn-outline" onclick="closeModal('registerModal')" data-i18n="btn_cancel">Cancel</button>
+                <button class="btn btn-primary" onclick="register()" data-i18n="auth_register">Register</button>
             </div>
         </div>
     </div>
@@ -112,6 +113,7 @@
         <p>JGame Platform &copy; 2025 | Built by Google Gemini (Antigravity) & Silvere Martin-Michiellot</p>
     </footer>
 
+    <script src="js/i18n.js"></script>
     <script src="js/api.js"></script>
     <script src="js/app.js"></script>
 </body>

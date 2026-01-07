@@ -29,7 +29,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jgame.model.GameUser;
-import org.jgame.logic.games.checkers.CheckersFXPanel;
+
 import org.jgame.ui.test.BaseUITest;
 import org.junit.jupiter.api.Test;
 

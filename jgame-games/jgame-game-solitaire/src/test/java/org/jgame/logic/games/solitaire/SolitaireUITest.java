@@ -29,6 +29,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jgame.model.GameUser;
+
 import org.jgame.ui.test.BaseUITest;
 import org.junit.jupiter.api.Test;
 
@@ -50,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SolitaireUITest extends BaseUITest {
 
     private SolitaireRules solitaireGame;
-    private VBox solitairePanel;
+    private SolitaireFXPanel solitairePanel;
 
     @Override
     protected void setupStage(Stage stage) throws Exception {
@@ -64,12 +65,15 @@ public class SolitaireUITest extends BaseUITest {
         // Initialize game
         solitaireGame.initializeGame();
 
-        // Create solitaire panel (simplified for testing)
-        solitairePanel = new VBox(10);
-        solitairePanel.getChildren().add(new Label("Solitaire Game"));
+        // Create solitaire panel
+        solitairePanel = new SolitaireFXPanel(solitaireGame);
 
         // Create scene
-        Scene scene = new Scene(solitairePanel, 800, 600);
+        VBox root = new VBox(10);
+        root.getChildren().add(new Label("Solitaire Test"));
+        root.getChildren().add(solitairePanel);
+
+        Scene scene = new Scene(root, 800, 700);
         stage.setScene(scene);
         stage.setTitle("Solitaire UI Test");
     }
@@ -112,10 +116,10 @@ public class SolitaireUITest extends BaseUITest {
     @Test
     public void testStockPile() {
         // Verify stock pile exists (24 cards initially)
-        Button stockButton = lookup(".stock-pile").query();
-        if (stockButton != null) {
-            assertNotNull(stockButton);
-            assertTrue(stockButton.isVisible());
+        javafx.scene.Node stockPile = lookup(".stock-pile").query();
+        if (stockPile != null) {
+            assertNotNull(stockPile);
+            assertTrue(stockPile.isVisible());
         }
     }
 
@@ -127,16 +131,16 @@ public class SolitaireUITest extends BaseUITest {
 
     @Test
     public void testDrawCard() {
-        // Click stock to draw card
-        Button stockButton = lookup(".stock-pile").query();
-        if (stockButton != null) {
-            clickOn(stockButton);
-            waitFor(200);
+        // Draw card programmatically
+        interact(() -> {
+            solitaireGame.drawToWaste();
+            solitairePanel.render();
+        });
+        waitFor(200);
 
-            // Verify card appears in waste pile
-            long wasteCards = lookup(".waste-pile .card").queryAll().size();
-            assertTrue(wasteCards > 0, "Waste pile should have cards after drawing");
-        }
+        // Verify card appears in waste pile
+        long wasteCards = lookup(".waste-pile.card").queryAll().size();
+        assertTrue(wasteCards > 0, "Waste pile should have cards after drawing");
     }
 
     @Test
@@ -150,7 +154,7 @@ public class SolitaireUITest extends BaseUITest {
     public void testMoveCardBetweenTableau() {
         // Move card from one tableau pile to another
         // Must follow solitaire rules (descending rank, alternating color)
-        clickOn(".tableau-pile-1 .card");
+        clickOn(".tableau-pile-1.card");
         waitFor(100);
         clickOn(".tableau-pile-2");
         waitFor(100);
@@ -167,16 +171,15 @@ public class SolitaireUITest extends BaseUITest {
     @Test
     public void testRecycleStock() {
         // Draw all cards from stock
-        Button stockButton = lookup(".stock-pile").query();
-        if (stockButton != null) {
+        if (lookup(".stock-pile").query() != null) {
             for (int i = 0; i < 25; i++) {
-                clickOn(stockButton);
+                clickOn(".stock-pile");
                 waitFor(50);
             }
 
             // Stock should be empty, waste should have cards
             // Clicking again should recycle waste back to stock
-            clickOn(stockButton);
+            clickOn(".stock-pile");
             waitFor(100);
         }
     }
@@ -200,7 +203,7 @@ public class SolitaireUITest extends BaseUITest {
     @Test
     public void testUndoMove() {
         // Make a move
-        clickOn(".tableau-pile-1 .card");
+        clickOn(".tableau-pile-1.card");
         clickOn(".tableau-pile-2");
         waitFor(100);
 

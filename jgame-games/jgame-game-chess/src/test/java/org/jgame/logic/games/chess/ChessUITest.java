@@ -31,7 +31,6 @@ import javafx.stage.Stage;
 import org.jgame.model.GameUser;
 import org.jgame.ui.test.BaseUITest;
 import org.junit.jupiter.api.Test;
-import org.testfx.assertions.api.Assertions;
 
 import static org.junit.jupiter.api.Assertions.*;
 

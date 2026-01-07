@@ -29,7 +29,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jgame.model.GameUser;
-import org.jgame.logic.games.goose.GooseFXPanel;
+
 import org.jgame.ui.test.BaseUITest;
 import org.junit.jupiter.api.Test;
 

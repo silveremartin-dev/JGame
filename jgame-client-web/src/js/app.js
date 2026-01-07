@@ -13,7 +13,8 @@ const games = [
 ];
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await i18n.init();
     loadGames();
     setupNavigation();
     checkAuth();
@@ -45,20 +46,21 @@ function loadGames() {
 }
 
 function createGameCard(game) {
-    const players = game.minPlayers === game.maxPlayers
-        ? `${game.minPlayers} player${game.minPlayers > 1 ? 's' : ''}`
-        : `${game.minPlayers}-${game.maxPlayers} players`;
+    const playersSuffix = i18n.t('players');
+    const playersRange = game.minPlayers === game.maxPlayers
+        ? `${game.minPlayers} ${playersSuffix}`
+        : `${game.minPlayers}-${game.maxPlayers} ${playersSuffix}`;
 
     return `
         <div class="game-card">
             <div class="game-icon">${game.icon}</div>
-            <div class="game-name">${game.name}</div>
-            <div class="game-desc">${game.description}</div>
+            <div class="game-name">${i18n.t(game.id + '_name')}</div>
+            <div class="game-desc">${i18n.t(game.id + '_desc')}</div>
             <div class="game-meta">
-                <span>👥 ${players}</span>
+                <span>👥 ${playersRange}</span>
                 <span class="game-rating">⭐ ${game.rating}</span>
             </div>
-            <button class="btn btn-success" onclick="playGame('${game.id}')">Play</button>
+            <button class="btn btn-success" onclick="playGame('${game.id}')">${i18n.t('play')}</button>
         </div>
     `;
 }
@@ -93,12 +95,12 @@ function updateAuthUI() {
     if (currentUser) {
         authArea.innerHTML = `
             <span style="color: white;">👤 ${currentUser}</span>
-            <button class="btn btn-outline" onclick="logout()">Logout</button>
+            <button class="btn btn-outline" onclick="logout()">${i18n.t('auth_logout')}</button>
         `;
     } else {
         authArea.innerHTML = `
-            <button class="btn btn-primary" onclick="showLogin()">Login</button>
-            <button class="btn btn-outline" onclick="showRegister()">Register</button>
+            <button class="btn btn-primary" onclick="showLogin()">${i18n.t('auth_login')}</button>
+            <button class="btn btn-outline" onclick="showRegister()">${i18n.t('auth_register')}</button>
         `;
     }
 }
@@ -153,7 +155,7 @@ function logout() {
 }
 
 // Settings
-function saveSettings() {
+async function saveSettings() {
     const serverUrl = document.getElementById('serverUrl').value;
     const language = document.getElementById('language').value;
 
@@ -161,7 +163,13 @@ function saveSettings() {
     localStorage.setItem('jgame_language', language);
 
     api.baseUrl = serverUrl;
-    alert('Settings saved!');
+
+    // Switch language
+    await i18n.loadLocale(language);
+    i18n.translatePage();
+    updateAuthUI();
+
+    alert(i18n.t('success_settings'));
 }
 
 // Load saved settings
