@@ -131,11 +131,8 @@ public class SolitaireUITest extends BaseUITest {
 
     @Test
     public void testDrawCard() {
-        // Draw card programmatically
-        interact(() -> {
-            solitaireGame.drawToWaste();
-            solitairePanel.render();
-        });
+        // Draw card via UI interaction
+        clickOn(".stock-pile");
         waitFor(200);
 
         // Verify card appears in waste pile

@@ -33,5 +33,6 @@
     "goose_name": "Game of the Goose",
     "goose_desc": "Dice-based racing game",
     "solitaire_name": "Solitaire",
-    "solitaire_desc": "Single-player cards"
+    "solitaire_desc": "Single-player cards",
+    "game_not_implemented": "Game rendering not yet implemented in web client."
 }

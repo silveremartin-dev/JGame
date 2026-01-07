@@ -43,12 +43,14 @@ import java.util.Map;
  * @param phase              current game phase (SETUP, PLAYING, FINISHED)
  * @param boardState         serialized board state (game-specific)
  * @param playerStates       per-player state data
+ * @param availableActions   list of actions currently available to the active
+ *                           player
  * @param history            list of actions taken
  * @param createdAt          when the game started
  * @param updatedAt          when state was last modified
  *
  * @author Silvere Martin-Michiellot
- * @version 1.0
+ * @version 1.1
  */
 public record GameState(
         String gameId,
@@ -59,6 +61,7 @@ public record GameState(
         GamePhase phase,
         Map<String, Object> boardState,
         Map<String, Object> playerStates,
+        List<GameAction> availableActions,
         List<GameAction> history,
         Instant createdAt,
         Instant updatedAt) implements Serializable {
@@ -100,6 +103,7 @@ public record GameState(
         playerIds = List.copyOf(playerIds);
         boardState = boardState != null ? Map.copyOf(boardState) : Map.of();
         playerStates = playerStates != null ? Map.copyOf(playerStates) : Map.of();
+        availableActions = availableActions != null ? List.copyOf(availableActions) : List.of();
         history = history != null ? List.copyOf(history) : List.of();
         if (createdAt == null) {
             createdAt = Instant.now();

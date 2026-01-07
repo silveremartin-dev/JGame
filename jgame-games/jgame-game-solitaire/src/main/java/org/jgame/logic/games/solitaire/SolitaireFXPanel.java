@@ -112,9 +112,30 @@ public class SolitaireFXPanel extends BorderPane {
         autoCompleteBtn.setVisible(false); // Only visible when possible
 
         hintBtn.setOnAction(e -> {
-            Label hintIndicator = new Label("Move card X to Y");
+            SolitaireSolver solver = new SolitaireSolver();
+            org.jgame.logic.engine.GameAction hint = solver.computeMove(rules.toGameState());
+            String moveText;
+            if (hint != null) {
+                moveText = "Hint: " + hint.actionType();
+                if (hint.parameters().containsKey("from")) {
+                    moveText += " from " + hint.parameters().get("from");
+                }
+                if (hint.parameters().containsKey("to")) {
+                    moveText += " to " + hint.parameters().get("to");
+                }
+            } else {
+                moveText = "No moves found!";
+            }
+            Label hintIndicator = new Label(moveText);
             hintIndicator.getStyleClass().add("hint-indicator");
+            hintIndicator.setStyle("-fx-background-color: yellow; -fx-padding: 5;");
             gameArea.getChildren().add(hintIndicator);
+
+            // Auto-remove hint after 3 seconds
+            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(
+                    javafx.util.Duration.seconds(3));
+            pause.setOnFinished(ev -> gameArea.getChildren().remove(hintIndicator));
+            pause.play();
         });
 
         statsBtn.setOnAction(e -> {
@@ -124,6 +145,7 @@ public class SolitaireFXPanel extends BorderPane {
         });
 
         autoCompleteBtn.setOnAction(e -> {
+            rules.autoComplete();
             render();
         });
 
@@ -134,12 +156,13 @@ public class SolitaireFXPanel extends BorderPane {
                 autoCompleteBtn, newGameBtn);
         setBottom(statusBar);
 
-        // Simple timer simulation for test
+        // Dynamic UI updates
         javafx.animation.Timeline timeline = new javafx.animation.Timeline(
                 new javafx.animation.KeyFrame(javafx.util.Duration.seconds(1), ev -> {
-                    String current = timerLabel.getText();
-                    int secs = Integer.parseInt(current.split(":")[1]) + 1;
-                    timerLabel.setText(String.format("00:%02d", secs));
+                    scoreLabel.setText("Score: " + rules.getScore(null).getScoreValue());
+                    long secs = rules.getElapsedTime();
+                    timerLabel.setText(String.format("%02d:%02d", secs / 60, secs % 60));
+                    autoCompleteBtn.setVisible(rules.canAutoComplete());
                 }));
         timeline.setCycleCount(javafx.animation.Animation.INDEFINITE);
         timeline.play();
@@ -154,12 +177,8 @@ public class SolitaireFXPanel extends BorderPane {
             // Since we can't easily check for file existence dynamically without
             // exceptions,
             // we will use a Rectangle styled as a card back.
-            Rectangle deckBack = new Rectangle(CARD_WIDTH, CARD_HEIGHT, Color.BLUE);
+            javafx.scene.Node deckBack = createCardBack();
             deckBack.getStyleClass().add("stock-pile");
-            deckBack.setArcWidth(10);
-            deckBack.setArcHeight(10);
-            deckBack.setStroke(Color.WHITE);
-            deckBack.setStrokeWidth(2);
             deckBack.setLayoutX(MARGIN);
             deckBack.setLayoutY(MARGIN);
             // Click to draw
@@ -298,14 +317,11 @@ public class SolitaireFXPanel extends BorderPane {
                         cardNode.setLayoutY(cardY);
                         gameArea.getChildren().add(cardNode);
                     } else {
-                        Rectangle back = new Rectangle(CARD_WIDTH, CARD_HEIGHT, Color.BLUE);
+                        javafx.scene.Node back = createCardBack();
                         back.getStyleClass().add("tableau-pile");
                         back.getStyleClass().add("tableau-pile-" + (i + 1));
                         back.getStyleClass().add("card");
                         back.getStyleClass().add("card-face-down");
-                        back.setArcWidth(10);
-                        back.setArcHeight(10);
-                        back.setStroke(Color.WHITE);
                         back.setLayoutX(x);
                         back.setLayoutY(cardY);
                         gameArea.getChildren().add(back);
@@ -313,12 +329,21 @@ public class SolitaireFXPanel extends BorderPane {
                 }
             }
         }
+
+        if (rules.isFinished()) {
+            Label winLabel = new Label("VICTORY!");
+            winLabel.setStyle(
+                    "-fx-font-size: 60px; -fx-text-fill: gold; -fx-effect: dropshadow(gaussian, black, 10, 0, 0, 0);");
+            gameArea.getChildren().add(winLabel);
+            winLabel.layoutXProperty().bind(gameArea.widthProperty().subtract(winLabel.widthProperty()).divide(2));
+            winLabel.layoutYProperty().bind(gameArea.heightProperty().subtract(winLabel.heightProperty()).divide(2));
+        }
     }
 
     // Helper to get image path
     public Image getCardImage(Card card) {
         if (!card.isFaceUp())
-            return null;
+            return null; // Should use createCardBack
 
         String rankStr = switch (card.getRank()) {
             case ACE -> "ace";
@@ -344,7 +369,27 @@ public class SolitaireFXPanel extends BorderPane {
         } catch (Exception e) {
             // ignore
         }
-        return null;
+        return null; // Fallback to placeholder if image missing
+    }
+
+    private javafx.scene.Node createCardBack() {
+        Rectangle back = new Rectangle(CARD_WIDTH, CARD_HEIGHT);
+        back.setArcWidth(10);
+        back.setArcHeight(10);
+        // Nice gradient for back
+        javafx.scene.paint.Stop[] stops = new javafx.scene.paint.Stop[] {
+                new javafx.scene.paint.Stop(0, Color.DARKBLUE),
+                new javafx.scene.paint.Stop(1, Color.ROYALBLUE)
+        };
+        javafx.scene.paint.LinearGradient lg = new javafx.scene.paint.LinearGradient(
+                0, 0, 1, 1, true, javafx.scene.paint.CycleMethod.NO_CYCLE, stops);
+        back.setFill(lg);
+        back.setStroke(Color.WHITE);
+        back.setStrokeWidth(2);
+
+        StackPane p = new StackPane(back);
+        p.getStyleClass().add("card-back");
+        return p;
     }
 
     private javafx.scene.Node createCardPlaceholder(Card card) {

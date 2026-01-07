@@ -67,7 +67,34 @@ function createGameCard(game) {
 
 function playGame(gameId) {
     const game = games.find(g => g.id === gameId);
-    alert(`Launching ${game.name}...\n\nGame lobby would open here.`);
+    if (!game) return;
+
+    showSection('play');
+    document.getElementById('currentGameName').innerText = i18n.t(game.id + '_name');
+    
+    if (gameId === 'solitaire') {
+        initSolitaire();
+    } else {
+        document.getElementById('gameCanvas').innerHTML = `<p>${i18n.t('game_not_implemented')}</p>`;
+    }
+}
+
+async function initSolitaire() {
+    // Solitaire JS logic will be imported/called here
+    const canvas = document.getElementById('gameCanvas');
+    canvas.innerHTML = '<div class="solitaire-board">Loading Solitaire...</div>';
+    
+    // Dynamically load solitaire.js if not already loaded
+    if (!window.SolitaireGame) {
+        const script = document.createElement('script');
+        script.src = 'js/games/solitaire.js';
+        script.onload = () => {
+            window.SolitaireGame.init(canvas);
+        };
+        document.body.appendChild(script);
+    } else {
+        window.SolitaireGame.init(canvas);
+    }
 }
 
 // Search

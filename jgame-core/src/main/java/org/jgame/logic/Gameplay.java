@@ -53,13 +53,13 @@ public class Gameplay {
     private final Deque<ActionInterface> undoStack;
     private final Deque<ActionInterface> redoStack;
 
-    private GameState state;
+    private GameplayState state;
     private int currentPlayerIndex;
 
     /**
      * Game states.
      */
-    public enum GameState {
+    public enum GameplayState {
         /** Game not yet started */
         SETUP,
         /** Game is running */
@@ -81,7 +81,7 @@ public class Gameplay {
         this.actions = new ArrayList<>();
         this.undoStack = new ArrayDeque<>();
         this.redoStack = new ArrayDeque<>();
-        this.state = GameState.SETUP;
+        this.state = GameplayState.SETUP;
         this.currentPlayerIndex = 0;
         logger.debug("Gameplay created for game: {}", game.getClass().getSimpleName());
     }
@@ -100,7 +100,7 @@ public class Gameplay {
      *
      * @return current state
      */
-    public GameState getState() {
+    public GameplayState getState() {
         return state;
     }
 
@@ -108,7 +108,7 @@ public class Gameplay {
      * Initializes gameplay, gathering players and preparing the game.
      */
     public void setupGameplay() {
-        if (state != GameState.SETUP) {
+        if (state != GameplayState.SETUP) {
             logger.warn("Cannot setup gameplay - already in state: {}", state);
             return;
         }
@@ -142,7 +142,7 @@ public class Gameplay {
      * @param players the players to set
      */
     public void setPlayers(@NotNull Set<PlayerInterface> players) {
-        if (state != GameState.SETUP) {
+        if (state != GameplayState.SETUP) {
             logger.warn("Cannot set players during gameplay");
             return;
         }
@@ -174,12 +174,12 @@ public class Gameplay {
      * Starts the gameplay.
      */
     public void startGameplay() {
-        if (state == GameState.SETUP) {
+        if (state == GameplayState.SETUP) {
             setupGameplay();
         }
 
-        if (state == GameState.PAUSED || state == GameState.SETUP) {
-            state = GameState.PLAYING;
+        if (state == GameplayState.PAUSED || state == GameplayState.SETUP) {
+            state = GameplayState.PLAYING;
             logger.info("Gameplay started");
         } else {
             logger.warn("Cannot start - current state: {}", state);
@@ -190,8 +190,8 @@ public class Gameplay {
      * Pauses the gameplay.
      */
     public void pauseGameplay() {
-        if (state == GameState.PLAYING) {
-            state = GameState.PAUSED;
+        if (state == GameplayState.PLAYING) {
+            state = GameplayState.PAUSED;
             logger.info("Gameplay paused");
         }
     }
@@ -200,7 +200,7 @@ public class Gameplay {
      * Ends the gameplay.
      */
     public void endGameplay() {
-        state = GameState.FINISHED;
+        state = GameplayState.FINISHED;
         logger.info("Gameplay ended");
     }
 
@@ -210,7 +210,7 @@ public class Gameplay {
      * @return true if finished
      */
     public boolean isFinished() {
-        return state == GameState.FINISHED || game.isFinished();
+        return state == GameplayState.FINISHED || game.isFinished();
     }
 
     /**

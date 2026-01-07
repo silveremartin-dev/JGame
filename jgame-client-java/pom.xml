@@ -36,6 +36,11 @@
             <artifactId>jgame-game-goose</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jgame</groupId>
+            <artifactId>jgame-game-solitaire</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Testing -->
         <dependency>
@@ -72,6 +77,14 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
+        </dependency>
+
+        <!-- TestFX -->
+        <dependency>
+            <groupId>org.testfx</groupId>
+            <artifactId>testfx-junit5</artifactId>
+            <version>4.0.16-alpha</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

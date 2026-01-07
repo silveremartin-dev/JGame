@@ -146,6 +146,9 @@ public class MinimaxAI implements GameAI {
      * Gets valid moves from state.
      */
     protected List<GameAction> getValidMoves(GameState state) {
+        if (state.availableActions() != null && !state.availableActions().isEmpty()) {
+            return state.availableActions();
+        }
         return List.of();
     }
 

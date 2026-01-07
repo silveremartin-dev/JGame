@@ -65,6 +65,18 @@
                 <button class="btn btn-primary" onclick="saveSettings()" data-i18n="btn_save">Save</button>
             </div>
         </section>
+
+        <section id="play" class="section">
+            <div class="play-container">
+                <div class="play-header">
+                    <h2 id="currentGameName">Game Name</h2>
+                    <button class="btn btn-outline" onclick="showSection('games')">Back to Games</button>
+                </div>
+                <div id="gameCanvas" class="game-canvas">
+                    <!-- Game specific UI will be injected here -->
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Login Modal -->

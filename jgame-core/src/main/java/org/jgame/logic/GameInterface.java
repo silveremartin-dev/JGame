@@ -94,4 +94,13 @@ public interface GameInterface {
     default ScoreInterface getScore(PlayerInterface player) {
         return null;
     }
+
+    /**
+     * Converts current game state to a serializable record.
+     * 
+     * @return GameState record
+     */
+    default org.jgame.logic.engine.GameState toGameState() {
+        return null; // Subclasses should implement
+    }
 }

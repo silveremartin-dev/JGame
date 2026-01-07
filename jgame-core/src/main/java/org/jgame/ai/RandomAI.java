@@ -86,10 +86,13 @@ public class RandomAI implements GameAI {
 
     /**
      * Gets valid moves from game state.
-     * Override in game-specific implementations.
+     * Uses availableActions if present in the record,
+     * otherwise returns an empty list (to be overridden by subclasses).
      */
     protected List<GameAction> getValidMoves(GameState state) {
-        // Default: empty list - subclasses should override
+        if (state.availableActions() != null && !state.availableActions().isEmpty()) {
+            return state.availableActions();
+        }
         return List.of();
     }
 }

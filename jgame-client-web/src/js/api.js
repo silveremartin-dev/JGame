@@ -107,6 +107,25 @@ class JGameAPI {
     async getLeaderboard(gameId, limit = 10) {
         return this.request(`/api/scores/${gameId}/leaderboard?limit=${limit}`);
     }
+
+    // Sessions (Gameplay)
+    async createSession(gameId) {
+        return this.request('/api/sessions', {
+            method: 'POST',
+            body: JSON.stringify({ gameId })
+        });
+    }
+
+    async getSession(sessionId) {
+        return this.request(`/api/sessions/${sessionId}`);
+    }
+
+    async executeAction(sessionId, actionType, parameters = {}) {
+        return this.request(`/api/sessions/${sessionId}/actions`, {
+            method: 'POST',
+            body: JSON.stringify({ actionType, parameters })
+        });
+    }
 }
 
 // Global instance

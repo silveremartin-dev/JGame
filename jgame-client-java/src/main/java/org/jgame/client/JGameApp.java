@@ -61,10 +61,14 @@ public class JGameApp extends Application {
     private BorderPane root;
     private TabPane mainTabs;
     private String currentUser = null;
+    private GameApiClient apiClient;
 
     @Override
     public void start(Stage primaryStage) {
         logger.info("Starting JGame Application");
+
+        // Initialize API client
+        this.apiClient = new GameApiClient("http://localhost:8080");
 
         root = new BorderPane();
         root.setStyle("-fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e);");
@@ -88,6 +92,9 @@ public class JGameApp extends Application {
         scene.getStylesheets().add(getClass().getResource("/css/jgame.css") != null
                 ? getClass().getResource("/css/jgame.css").toExternalForm()
                 : "");
+
+        // Load initial data
+        refreshGamesList();
 
         primaryStage.setTitle(APP_TITLE);
         primaryStage.setScene(scene);
@@ -170,18 +177,15 @@ public class JGameApp extends Application {
         sortBox.setValue("Name");
         sortBox.setStyle("-fx-background-color: rgba(255,255,255,0.1);");
 
-        searchBar.getChildren().addAll(new Label("🔍"), searchField, new Label("Sort:"), sortBox);
+        Button refreshBtn = new Button("Refresh");
+        refreshBtn.setOnAction(e -> refreshGamesList());
+
+        searchBar.getChildren().addAll(new Label("🔍"), searchField, new Label("Sort:"), sortBox, refreshBtn);
 
         // Game grid
         FlowPane gameGrid = new FlowPane(20, 20);
+        gameGrid.setId("gameGrid");
         gameGrid.setPadding(new Insets(20, 0, 0, 0));
-
-        // Add sample games
-        gameGrid.getChildren().addAll(
-                createGameCard("Chess", "Classic 2-player strategy", "⬛", 2, 2, 4.5),
-                createGameCard("Checkers", "Jump and capture", "🔴", 2, 2, 4.2),
-                createGameCard("Game of the Goose", "Dice-based race", "🦆", 2, 6, 4.0),
-                createGameCard("Solitaire", "Single-player cards", "🃏", 1, 1, 4.3));
 
         ScrollPane scrollPane = new ScrollPane(gameGrid);
         scrollPane.setFitToWidth(true);
@@ -192,6 +196,61 @@ public class JGameApp extends Application {
 
         tab.setContent(content);
         return tab;
+    }
+
+    private void refreshGamesList() {
+        if (mainTabs == null)
+            return;
+
+        // Find grid in the UI hierarchy
+        if (mainTabs.getTabs().isEmpty())
+            return;
+        Tab gamesTab = mainTabs.getTabs().get(0);
+        if (gamesTab.getContent() instanceof VBox vbox) {
+            // Assuming ScrollPane is 2nd child (index 1)
+            if (vbox.getChildren().size() > 1 && vbox.getChildren().get(1) instanceof ScrollPane sp) {
+                if (sp.getContent() instanceof FlowPane grid) {
+                    grid.getChildren().clear();
+                    grid.getChildren().add(new Label("Loading games..."));
+
+                    apiClient.getGames().thenAccept(games -> {
+                        javafx.application.Platform.runLater(() -> {
+                            grid.getChildren().clear();
+                            if (games.isEmpty()) {
+                                grid.getChildren().add(new Label("No games found on server."));
+                            } else {
+                                for (GameApiClient.GameInfo game : games) {
+                                    grid.getChildren().add(createGameCard(
+                                            game.name(),
+                                            game.description(),
+                                            getGameIcon(game.id()),
+                                            game.minPlayers(),
+                                            game.maxPlayers(),
+                                            4.5 // Placeholder rating
+                                    ));
+                                }
+                            }
+                        });
+                    }).exceptionally(e -> {
+                        javafx.application.Platform.runLater(() -> {
+                            grid.getChildren().clear();
+                            grid.getChildren().add(new Label("Error connecting to server: " + e.getMessage()));
+                        });
+                        return null;
+                    });
+                }
+            }
+        }
+    }
+
+    private String getGameIcon(String id) {
+        return switch (id) {
+            case "chess" -> "⬛";
+            case "checkers" -> "🔴";
+            case "goose" -> "🦆";
+            case "solitaire" -> "🃏";
+            default -> "🎮";
+        };
     }
 
     private VBox createGameCard(String name, String description, String icon, int minPlayers, int maxPlayers,
@@ -434,11 +493,63 @@ public class JGameApp extends Application {
 
     private void launchGame(String gameName) {
         logger.info("Launching game: {}", gameName);
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Launch Game");
-        alert.setHeaderText(gameName);
-        alert.setContentText("Game lobby would open here.");
-        alert.show();
+
+        try {
+            Stage gameStage = new Stage();
+            gameStage.setTitle(gameName);
+
+            javafx.scene.Parent gamePanel = null;
+
+            // Normalize name to ID map
+            String gameId = gameName.toLowerCase().replace(" ", ""); // Rough normalization
+            if (gameName.contains("Chess"))
+                gameId = "chess";
+            else if (gameName.contains("Checkers"))
+                gameId = "checkers";
+            else if (gameName.contains("Goose"))
+                gameId = "goose";
+            else if (gameName.contains("Solitaire"))
+                gameId = "solitaire";
+
+            switch (gameId) {
+                case "chess" -> {
+                    org.jgame.logic.games.chess.ChessRules rules = new org.jgame.logic.games.chess.ChessRules();
+                    rules.initializeGame();
+                    gamePanel = new org.jgame.logic.games.chess.ChessFXPanel(rules);
+                }
+                case "checkers" -> {
+                    org.jgame.logic.games.checkers.CheckersRules rules = new org.jgame.logic.games.checkers.CheckersRules();
+                    rules.initGame();
+                    gamePanel = new org.jgame.logic.games.checkers.CheckersFXPanel(rules);
+                }
+                case "goose" -> {
+                    org.jgame.logic.games.goose.GooseRules rules = new org.jgame.logic.games.goose.GooseRules();
+                    rules.startGame();
+                    gamePanel = new org.jgame.logic.games.goose.GooseFXPanel(rules);
+                }
+                case "solitaire" -> {
+                    org.jgame.logic.games.solitaire.SolitaireRules rules = new org.jgame.logic.games.solitaire.SolitaireRules();
+                    rules.initializeGame();
+                    gamePanel = new org.jgame.logic.games.solitaire.SolitaireFXPanel(rules);
+                }
+                default -> {
+                    showError("Launch Error", "Unknown game: " + gameName);
+                    return;
+                }
+            }
+
+            Scene scene = new Scene(gamePanel, 800, 600);
+            if (getClass().getResource("/css/jgame.css") != null) {
+                scene.getStylesheets().add(getClass().getResource("/css/jgame.css").toExternalForm());
+            }
+
+            gameStage.setScene(scene);
+            gameStage.show();
+
+        } catch (Exception e) {
+            logger.error("Failed to launch game " + gameName, e);
+            showError("Launch Error", "Could not start game: " + e.getMessage());
+        }
     }
 
     private void refreshUI() {

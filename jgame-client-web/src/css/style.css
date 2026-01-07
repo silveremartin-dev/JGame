@@ -56,7 +56,8 @@ body {
     transition: all 0.3s;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover,
+.nav-link.active {
     color: var(--text);
     background: var(--card-bg);
 }
@@ -125,7 +126,8 @@ body {
 }
 
 /* Forms */
-.input, .select {
+.input,
+.select {
     padding: 10px 15px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -242,6 +244,93 @@ body {
     font-size: 13px;
 }
 
+/* Game Play Area */
+.play-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.game-canvas {
+    background: rgba(46, 139, 87, 0.4);
+    /* Green felt transparency */
+    border-radius: var(--radius);
+    padding: 30px;
+    min-height: 500px;
+    border: 2px solid var(--border);
+}
+
+/* SolitaireSpecific */
+.solitaire-board {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.top-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.stock-waste,
+.foundations,
+.tableau {
+    display: flex;
+    gap: 20px;
+}
+
+.card-pile {
+    width: 90px;
+    height: 130px;
+    border-radius: 8px;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.card-pile:hover {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.card {
+    width: 100%;
+    height: 100%;
+    background: white;
+    color: black;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 12px;
+    text-align: center;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.card.back {
+    background: var(--primary);
+    color: white;
+}
+
+.dragging {
+    opacity: 0.5;
+    border: 2px dashed yellow !important;
+}
+
+.card-placeholder {
+    width: 100%;
+    height: 100%;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+}
+
 /* Utilities */
 .muted {
     color: var(--text-muted);
@@ -253,13 +342,13 @@ body {
         flex-wrap: wrap;
         gap: 15px;
     }
-    
+
     .nav {
         margin-left: 0;
         order: 3;
         width: 100%;
     }
-    
+
     .game-grid {
         grid-template-columns: 1fr;
     }

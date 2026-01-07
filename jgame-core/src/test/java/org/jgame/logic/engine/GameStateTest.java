@@ -48,7 +48,8 @@ class GameStateTest {
                 GameState.GamePhase.PLAYING,
                 Map.of(),
                 Map.of(),
-                List.of(),
+                List.of(), // availableActions
+                List.of(), // history
                 Instant.now(),
                 Instant.now());
         assertNotNull(state);
@@ -67,7 +68,8 @@ class GameStateTest {
                 GameState.GamePhase.PLAYING,
                 Map.of(),
                 Map.of(),
-                List.of(),
+                List.of(), // availableActions
+                List.of(), // history
                 Instant.now(),
                 Instant.now());
         assertFalse(state.isEnded());
@@ -85,7 +87,8 @@ class GameStateTest {
                 GameState.GamePhase.PLAYING,
                 Map.of(),
                 Map.of(),
-                List.of(),
+                List.of(), // availableActions
+                List.of(), // history
                 Instant.now(),
                 Instant.now());
         assertEquals("player1", state.currentPlayerId());
@@ -104,7 +107,8 @@ class GameStateTest {
                 GameState.GamePhase.FINISHED,
                 Map.of(),
                 Map.of(),
-                List.of(),
+                List.of(), // availableActions
+                List.of(), // history
                 Instant.now(),
                 Instant.now());
         assertTrue(state.isEnded());
