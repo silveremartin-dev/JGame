@@ -71,7 +71,7 @@ public class JGameApp extends Application {
         this.apiClient = new GameApiClient("http://localhost:8080");
 
         root = new BorderPane();
-        root.setStyle("-fx-background-color: linear-gradient(to bottom, #1a1a2e, #16213e);");
+        root.setStyle("-fx-background-color: linear-gradient(to bottom, #2c3e50, #34495e);");
 
         // Header
         root.setTop(createHeader());
@@ -86,7 +86,7 @@ public class JGameApp extends Application {
         root.setCenter(mainTabs);
 
         // Footer
-        root.setBottom(createFooter());
+        root.setBottom(createFooter("Connecting..."));
 
         Scene scene = new Scene(root, WIDTH, HEIGHT);
         scene.getStylesheets().add(getClass().getResource("/css/jgame.css") != null
@@ -215,6 +215,7 @@ public class JGameApp extends Application {
 
                     apiClient.getGames().thenAccept(games -> {
                         javafx.application.Platform.runLater(() -> {
+                            updateFooter("🟢 Online • Connected to Server");
                             grid.getChildren().clear();
                             if (games.isEmpty()) {
                                 grid.getChildren().add(new Label("No games found on server."));
@@ -234,6 +235,7 @@ public class JGameApp extends Application {
                     }).exceptionally(e -> {
                         javafx.application.Platform.runLater(() -> {
                             logger.warn("Server unreachable, switching to Offline Mode");
+                            updateFooter("🔴 Offline Mode • Local Play Only");
                             grid.getChildren().clear();
 
                             // Offline Mode Indicator
@@ -399,17 +401,28 @@ public class JGameApp extends Application {
         return tab;
     }
 
-    private HBox createFooter() {
+    private HBox createFooter(String statusText) {
         HBox footer = new HBox();
         footer.setAlignment(Pos.CENTER);
         footer.setPadding(new Insets(10));
         footer.setStyle("-fx-background-color: rgba(0,0,0,0.2);");
 
-        Label status = new Label("Ready • Connected to localhost:8080");
-        status.setStyle("-fx-text-fill: #888;");
+        Label status = new Label(statusText);
+        status.setId("statusLabel");
+        status.setStyle("-fx-text-fill: #ecf0f1;");
 
         footer.getChildren().add(status);
         return footer;
+    }
+
+    private void updateFooter(String statusText) {
+        if (root.getBottom() instanceof HBox footer) {
+            footer.getChildren().clear();
+            Label status = new Label(statusText);
+            status.setId("statusLabel");
+            status.setStyle("-fx-text-fill: #ecf0f1;");
+            footer.getChildren().add(status);
+        }
     }
 
     private void showLoginDialog() {

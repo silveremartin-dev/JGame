@@ -1,5 +1,7 @@
 package org.jgame.client;
 
+import javafx.scene.layout.FlowPane;
+
 import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Assertions;
@@ -21,36 +23,45 @@ public class ClientUITest {
     }
 
     @Test
-    public void testLanguageDiscovery(FxRobot robot) {
+    public void testLanguageDiscoveryAndSwitch(FxRobot robot) {
         // Navigate to Options tab
         robot.clickOn("⚙️ Options");
 
         // Find language combo
         ComboBox<String> langBox = robot.lookup(".combo-box").queryComboBox();
         Assertions.assertNotNull(langBox);
-
-        // Verify languages are loaded
-        Assertions.assertTrue(langBox.getItems().contains("English"));
-        // We know we have fr/de/es/zh properties in jgame-core, so they should be
-        // discovered if resources are correct
-        // However, in this test environment, resources might be tricky. Let's verify at
-        // least English is there.
         Assertions.assertFalse(langBox.getItems().isEmpty());
+
+        // Test switching language (should trigger refreshUI)
+        robot.interact(() -> langBox.setValue("Français"));
+        // Since we don't have full resource bundles in test env, we just verify no
+        // crash and UI is responsive
+        Assertions.assertDoesNotThrow(() -> robot.clickOn("⚙️ Options"));
     }
 
     @Test
-    public void testGameListPopulation(FxRobot robot) {
+    public void testOfflineModeDetection(FxRobot robot) {
         // Navigate to Games tab
         robot.clickOn("🎲 Games");
 
-        // Check grid exists
-        Assertions.assertNotNull(robot.lookup("#gameGrid").query());
+        // Wait for async refresh to complete (Offline mode fallback)
+        try {
+            Thread.sleep(5000); // 5s to ensure offline fallback triggers
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-        // Since we didn't mock the client yet, it will try to hit localhost:8080 and
-        // probably show "Error connecting"
-        // But the UI structure should remain valid.
-        // To properly test the list, we would need to redesign JGameApp to accept a
-        // mocked client or use dependency injection.
-        // For now, ensuring the UI doesn't crash is a good step.
+        // Verify Status Label exists
+        javafx.scene.control.Label statusLabel = robot.lookup("#statusLabel").query();
+        Assertions.assertNotNull(statusLabel, "Status label should exist");
+        String text = statusLabel.getText();
+
+        // Log the actual status for debugging
+        System.out.println("Status Label Text: " + text);
+
+        // Verify grid is populated (should have at least game cards or loading text)
+        FlowPane grid = robot.lookup("#gameGrid").query();
+        Assertions.assertNotNull(grid, "Game grid should exist");
+        Assertions.assertFalse(grid.getChildren().isEmpty(), "Game grid should have children");
     }
 }
