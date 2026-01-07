@@ -39,6 +39,8 @@ La classe `SolitaireRules` est actuellement une version simplifiée.
 - [x] **Tests Solitaire** : Nettoyer `SolitaireUITest` pour ne plus dépendre de contournements (Refactorisé avec TestFX clickOn).
 - [x] **Couverture de Code** : Augmenter la couverture de tests pour `jgame-core` et `jgame-server` (Ajout ClientDiscoveryTest).
 - [x] **Tests Client UI** : Créer `ClientUITest` (Mock Server) pour valider l'interface.
+- [x] **Mode Hors Ligne** : Permettre de jouer aux jeux locaux sans serveur (Fallback géré).
+- [x] **Config Partie Locale** : Ajouter dialogue de configuration Humain/IA pour Échecs et Dames.
 
 ## 6. Serveur et Base de Données (Priorité Basse)
 

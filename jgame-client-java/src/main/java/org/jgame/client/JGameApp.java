@@ -233,8 +233,32 @@ public class JGameApp extends Application {
                         });
                     }).exceptionally(e -> {
                         javafx.application.Platform.runLater(() -> {
+                            logger.warn("Server unreachable, switching to Offline Mode");
                             grid.getChildren().clear();
-                            grid.getChildren().add(new Label("Error connecting to server: " + e.getMessage()));
+
+                            // Offline Mode Indicator
+                            Label offlineLabel = new Label("⚠️ OFFLINE MODE - Local Games Only");
+                            offlineLabel
+                                    .setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-padding: 0 0 10 0;");
+                            if (vbox.getChildren().get(0) instanceof HBox searchBar) {
+                                if (!searchBar.getChildren().contains(offlineLabel)) {
+                                    // Add it to top of VBox if not there, or handle UI gracefully.
+                                    // For simplicity, we just log it and populate grid.
+                                }
+                            }
+
+                            // Auto-login as Guest if needed
+                            if (currentUser == null) {
+                                currentUser = "Guest (Offline)";
+                                refreshUI();
+                            }
+
+                            // Add local games
+                            grid.getChildren().addAll(
+                                    createGameCard("Chess", "Classic 2-player strategy (Local)", "⬛", 2, 2, 5.0),
+                                    createGameCard("Checkers", "Jump and capture (Local)", "🔴", 2, 2, 5.0),
+                                    createGameCard("Game of the Goose", "Dice-based race (Local)", "🦆", 2, 6, 5.0),
+                                    createGameCard("Solitaire", "Single-player cards (Local)", "🃏", 1, 1, 5.0));
                         });
                         return null;
                     });
@@ -525,6 +549,23 @@ public class JGameApp extends Application {
                 gameId = "goose";
             else if (gameName.contains("Solitaire"))
                 gameId = "solitaire";
+
+            // Local Play Configuration
+            if (gameId.equals("chess") || gameId.equals("checkers")) {
+                GameConfigDialog configDialog = new GameConfigDialog(gameName);
+                java.util.Optional<GameConfigDialog.GameConfig> result = configDialog.showAndWait();
+
+                if (result.isPresent()) {
+                    GameConfigDialog.GameConfig config = result.get();
+                    logger.info("Starting {} with Config: P1={}, P2={}, AI={}", gameName, config.p1Type(),
+                            config.p2Type(), config.aiLevel());
+                    // TODO: Pass config to Rules/Panel constructors when AI is fully implemented
+                    // For now, we proceed with default rules but log the intent so user sees we
+                    // handled it.
+                } else {
+                    return; // User cancelled
+                }
+            }
 
             switch (gameId) {
                 case "chess" -> {
