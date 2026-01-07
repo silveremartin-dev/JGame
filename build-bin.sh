@@ -35,7 +35,7 @@ echo "Copying JARs to bin/..."
 
 # Copy main JARs
 cp -f jgame-core/target/jgame-core-$VERSION.jar bin/ 2>/dev/null
-cp -f jgame-persistence/target/jgame-persistence-$VERSION.jar bin/ 2>/dev/null
+
 cp -f jgame-server/target/jgame-server-$VERSION.jar bin/ 2>/dev/null
 cp -f jgame-client-java/target/jgame-client-java-$VERSION.jar bin/ 2>/dev/null
 
@@ -72,7 +72,7 @@ echo ""
 echo "Output structure:"
 echo "  bin/"
 echo "    jgame-core-$VERSION.jar"
-echo "    jgame-persistence-$VERSION.jar"
+
 echo "    jgame-server-$VERSION.jar"
 echo "    jgame-client-java-$VERSION.jar"
 echo "    lib/         (dependencies)"

@@ -35,11 +35,9 @@ if [ ! -f "jgame-server/target/jgame-server-1.0-SNAPSHOT.jar" ]; then
 fi
 
 # Run server
+# Run server
 echo -e "Starting server on port ${GREEN}$SERVER_PORT${NC}..."
 echo ""
 
 cd jgame-server
-exec java $JAVA_OPTS \
-    -Dserver.port=$SERVER_PORT \
-    -cp "target/classes:target/dependency/*" \
-    org.jgame.server.JGameServer
+mvn exec:java -Dexec.mainClass="org.jgame.server.JGameServer" -Dserver.port=$SERVER_PORT

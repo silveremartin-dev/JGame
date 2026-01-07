@@ -33,8 +33,6 @@
  * <ul>
  * <li>{@link org.jgame.parts.tiles.AbstractSquareTile} - Square tile for grid
  * boards</li>
- * <li>{@link org.jgame.parts.tiles.AbstractHexagonalTile} - Hexagonal tile for
- * hex boards</li>
  * </ul>
  * 
  * @since 1.0

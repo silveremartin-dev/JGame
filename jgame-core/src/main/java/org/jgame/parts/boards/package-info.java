@@ -40,8 +40,6 @@
  * (Chess, Checkers)</li>
  * <li>{@link org.jgame.parts.boards.AbstractLineBoard} - Linear boards (Game of
  * the Goose)</li>
- * <li>{@link org.jgame.parts.boards.AbstractHexagonalBoard} - Hexagonal grid
- * boards</li>
  * </ul>
  * 
  * @since 1.0

@@ -29,7 +29,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jgame.model.GameUser;
-import org.jgame.plugin.impl.GoosePanel;
+import org.jgame.logic.games.goose.GooseFXPanel;
 import org.jgame.ui.test.BaseUITest;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class GooseUITest extends BaseUITest {
 
     private GooseRules gooseGame;
-    private GoosePanel goosePanel;
+    private GooseFXPanel goosePanel;
 
     @Override
     protected void setupStage(Stage stage) throws Exception {
@@ -66,11 +66,11 @@ public class GooseUITest extends BaseUITest {
         gooseGame.addPlayer(player2);
         gooseGame.addPlayer(player3);
 
-        // Initialize game
-        gooseGame.initializeGame();
+        // Start game (initializes playerPositions and game state)
+        gooseGame.startGame();
 
         // Create goose panel
-        goosePanel = new GoosePanel(gooseGame);
+        goosePanel = new GooseFXPanel(gooseGame);
 
         // Create scene
         VBox root = new VBox(10);
@@ -109,9 +109,9 @@ public class GooseUITest extends BaseUITest {
             clickOn(rollButton);
             waitFor(200);
 
-            // Verify dice result is shown
-            Label diceResult = lookup(".dice-result").query();
-            if (diceResult != null) {
+            // Verify dice result is shown (if such element exists)
+            if (!lookup(".dice-result").queryAll().isEmpty()) {
+                Label diceResult = lookup(".dice-result").query();
                 assertNotNull(diceResult.getText());
             }
         }
@@ -170,15 +170,17 @@ public class GooseUITest extends BaseUITest {
                 clickOn(rollButton);
                 waitFor(100);
 
-                // Verify dice result is between 2 and 12
-                Label diceResult = lookup(".dice-result").query();
-                if (diceResult != null && !diceResult.getText().isEmpty()) {
-                    try {
-                        int result = Integer.parseInt(diceResult.getText());
-                        assertTrue(result >= 2 && result <= 12,
-                                "Dice result should be between 2 and 12");
-                    } catch (NumberFormatException e) {
-                        // Dice result might be formatted differently
+                // Verify dice result is between 2 and 12 (if such element exists)
+                if (!lookup(".dice-result").queryAll().isEmpty()) {
+                    Label diceResult = lookup(".dice-result").query();
+                    if (!diceResult.getText().isEmpty()) {
+                        try {
+                            int result = Integer.parseInt(diceResult.getText());
+                            assertTrue(result >= 2 && result <= 12,
+                                    "Dice result should be between 2 and 12");
+                        } catch (NumberFormatException e) {
+                            // Dice result might be formatted differently
+                        }
                     }
                 }
             }

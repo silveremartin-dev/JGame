@@ -34,10 +34,6 @@
  * <ul>
  * <li>{@link org.jgame.parts.inventories.AbstractInventory} - Base inventory
  * implementation</li>
- * <li>{@link org.jgame.parts.inventories.LimitedInventory} - Fixed-capacity
- * inventory</li>
- * <li>{@link org.jgame.parts.inventories.StackableInventory} - Inventory with
- * item stacking</li>
  * </ul>
  * 
  * @since 1.0

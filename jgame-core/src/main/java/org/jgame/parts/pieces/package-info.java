@@ -35,9 +35,6 @@
  * <li>{@link org.jgame.parts.pieces.AbstractMovablePiece} - Base for movable
  * pieces (Chess, Checkers)</li>
  * <li>{@link org.jgame.parts.pieces.AbstractCard} - Base for card pieces</li>
- * <li>{@link org.jgame.parts.pieces.AbstractToken} - Base for token pieces</li>
- * <li>{@link org.jgame.parts.pieces.DominoTile} - Domino tile
- * implementation</li>
  * </ul>
  * 
  * @since 1.0

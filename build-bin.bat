@@ -34,7 +34,7 @@ echo Copying JARs to bin/...
 
 REM Copy main JARs
 copy /Y "jgame-core\target\jgame-core-%VERSION%.jar" "bin\" >nul 2>&1
-copy /Y "jgame-persistence\target\jgame-persistence-%VERSION%.jar" "bin\" >nul 2>&1
+
 copy /Y "jgame-server\target\jgame-server-%VERSION%.jar" "bin\" >nul 2>&1
 copy /Y "jgame-client-java\target\jgame-client-java-%VERSION%.jar" "bin\" >nul 2>&1
 

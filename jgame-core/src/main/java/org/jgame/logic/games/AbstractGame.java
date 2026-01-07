@@ -44,6 +44,13 @@ public abstract class AbstractGame implements GameInterface {
         this.description = description;
     }
 
+    /**
+     * Alias for initialize() to support legacy calls in tests.
+     */
+    public void initializeGame() {
+        initialize();
+    }
+
     @Override
     public String getName() {
         return name;

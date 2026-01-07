@@ -35,8 +35,6 @@
  * <li>{@link org.jgame.parts.players.GamePlayer} - Human player
  * implementation</li>
  * <li>{@link org.jgame.parts.players.AbstractPlayer} - Base player class</li>
- * <li>{@link org.jgame.parts.players.AbstractAIPlayer} - Base AI player
- * class</li>
  * </ul>
  * 
  * @since 1.0

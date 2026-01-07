@@ -64,6 +64,15 @@ public class GameUser {
         this("guest", "guest");
     }
 
+    /**
+     * Constructor with login only (uses default password).
+     * 
+     * @param login the login/username
+     */
+    public GameUser(@NotNull String login) {
+        this(login, "password");
+    }
+
     public String getLogin() {
         return login;
     }

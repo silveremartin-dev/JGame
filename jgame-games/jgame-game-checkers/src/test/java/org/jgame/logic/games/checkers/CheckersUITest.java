@@ -29,7 +29,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jgame.model.GameUser;
-import org.jgame.plugin.impl.CheckersPanel;
+import org.jgame.logic.games.checkers.CheckersFXPanel;
 import org.jgame.ui.test.BaseUITest;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CheckersUITest extends BaseUITest {
 
     private CheckersRules checkersGame;
-    private CheckersPanel checkersPanel;
+    private CheckersFXPanel checkersPanel;
 
     @Override
     protected void setupStage(Stage stage) throws Exception {
@@ -68,7 +68,7 @@ public class CheckersUITest extends BaseUITest {
         checkersGame.initializeGame();
 
         // Create checkers panel
-        checkersPanel = new CheckersPanel(checkersGame);
+        checkersPanel = new CheckersFXPanel(checkersGame);
 
         // Create scene
         VBox root = new VBox(10);

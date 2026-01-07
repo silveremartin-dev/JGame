@@ -122,7 +122,7 @@ public class SolitaireUITest extends BaseUITest {
     @Test
     public void testWastePile() {
         // Verify waste pile exists
-        assertNotNull(lookup(".waste-pile").queryOrNull());
+        assertNotNull(lookup(".waste-pile").query());
     }
 
     @Test
@@ -288,7 +288,7 @@ public class SolitaireUITest extends BaseUITest {
             waitFor(200);
 
             // Verify hint is displayed
-            assertNotNull(lookup(".hint-indicator").queryOrNull());
+            assertNotNull(lookup(".hint-indicator").query());
         }
     }
 
@@ -301,7 +301,7 @@ public class SolitaireUITest extends BaseUITest {
             waitFor(200);
 
             // Verify statistics dialog appears
-            assertNotNull(lookup(".statistics-dialog").queryOrNull());
+            assertNotNull(lookup(".statistics-dialog").query());
         }
     }
 }

@@ -30,10 +30,11 @@
  * </p>
  * 
  * <h2>Components</h2>
- * <ul>
- * <li>{@link org.jgame.parts.pots.AbstractPot} - Base pot implementation</li>
- * <li>{@link org.jgame.parts.pots.FinitePot} - Fixed-capacity pot</li>
- * <li>{@link org.jgame.parts.pots.InfinitePot} - Unlimited-capacity pot</li>
+ * <p>
+ * Pot implementations have been removed. The
+ * {@link org.jgame.parts.PotInterface}
+ * is available for future implementations.
+ * </p>
  * </ul>
  * 
  * @since 1.0

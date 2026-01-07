@@ -10,7 +10,7 @@ import java.util.Stack;
 /**
  * Simplistic Klondike Solitaire logic.
  */
-public class SolitaireRules {
+public class SolitaireRules extends org.jgame.logic.games.AbstractBoardGame {
 
     private Deck deck;
     private List<Stack<Card>> tableaus;
@@ -18,10 +18,21 @@ public class SolitaireRules {
     private Stack<Card> waste;
 
     public SolitaireRules() {
-        initializeGame();
+        super("Solitaire", "1.0", "Classic Klondike Solitaire");
     }
 
+    @Override
+    public void initialize() {
+        // Implementation of initialization
+        initializeGameLogic();
+    }
+
+    // Kept for backward compatibility/direct calling
     public void initializeGame() {
+        initialize();
+    }
+
+    private void initializeGameLogic() {
         deck = new Deck();
         deck.shuffle();
 
@@ -102,5 +113,43 @@ public class SolitaireRules {
         card.setFaceUp(true);
         waste.push(card);
         return true;
+    }
+
+    @Override
+    public org.jgame.parts.BoardInterface getBoard() {
+        // Temporary: Solitaire doesn't have a standard board setup yet
+        return null;
+    }
+
+    @Override
+    public org.jgame.parts.PlayerInterface getWinner() {
+        // Solitaire is single player, winning is clearing the board
+        return isFinished() ? getPlayers().get(0) : null;
+    }
+
+    @Override
+    public boolean isFinished() {
+        // Check if all foundations are full
+        for (Stack<Card> foundation : foundations) {
+            if (foundation.size() != 13)
+                return false;
+        }
+        return true;
+    }
+
+    public List<Stack<Card>> getTableaus() {
+        return tableaus;
+    }
+
+    public List<Stack<Card>> getFoundations() {
+        return foundations;
+    }
+
+    public Stack<Card> getWaste() {
+        return waste;
+    }
+
+    public Deck getDeck() {
+        return deck;
     }
 }
