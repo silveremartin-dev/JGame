@@ -629,12 +629,14 @@ public class JGameApp extends Application {
 
         if (config != null) {
             // Player 1
-            GameUser p1 = new GameUser("Player 1");
+            String p1Name = config.p1Type() == GameConfigDialog.PlayerType.HUMAN ? "Player 1" : config.p1Type().name();
+            GameUser p1 = new GameUser(p1Name);
             p1.setPlayerType(convertType(config.p1Type()));
             rules.addPlayer(p1);
 
             // Player 2
-            GameUser p2 = new GameUser("Player 2");
+            String p2Name = config.p2Type() == GameConfigDialog.PlayerType.HUMAN ? "Player 2" : config.p2Type().name();
+            GameUser p2 = new GameUser(p2Name);
             p2.setPlayerType(convertType(config.p2Type()));
             rules.addPlayer(p2);
         } else {

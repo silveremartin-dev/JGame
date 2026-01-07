@@ -90,4 +90,10 @@ public class CheckersPiece implements PieceInterface {
     public Image getImage(Image image) {
         return image;
     }
+
+    public CheckersPiece copy() {
+        CheckersPiece copy = new CheckersPiece(this.player, this.row, this.col);
+        copy.isKing = this.isKing;
+        return copy;
+    }
 }

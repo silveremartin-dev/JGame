@@ -34,6 +34,8 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.control.Tooltip;
+import org.jgame.util.I18n;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +60,7 @@ public class GooseFXPanel extends BorderPane {
     public GooseFXPanel(GooseRules rules) {
         this.rules = rules;
         this.boardPane = new FlowPane();
-        this.statusLabel = new Label("Press 'Roll Dice' to start");
+        this.statusLabel = new Label(I18n.get("goose.status.start"));
         this.tilePanes = new ArrayList<>();
 
         setupUI();
@@ -96,12 +98,12 @@ public class GooseFXPanel extends BorderPane {
         statusLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
         statusLabel.getStyleClass().add("current-player");
 
-        Button rollBtn = new Button("Roll Dice");
+        Button rollBtn = new Button(I18n.get("goose.action.roll"));
         rollBtn.getStyleClass().add("roll-dice-button");
         rollBtn.setStyle("-fx-font-size: 14px; -fx-padding: 10 20;");
         rollBtn.setOnAction(e -> handleRoll());
 
-        Button newGameBtn = new Button("New Game");
+        Button newGameBtn = new Button(I18n.get("goose.action.new_game"));
         newGameBtn.setOnAction(e -> startNewGame());
 
         controls.getChildren().addAll(statusLabel, rollBtn, newGameBtn);
@@ -134,6 +136,21 @@ public class GooseFXPanel extends BorderPane {
         else
             bg.setFill(Color.WHITE);
 
+        String tooltipKey = switch (number) {
+            case 63 -> "goose.tile.finish";
+            case 58 -> "goose.tile.death";
+            case 19 -> "goose.tile.inn";
+            case 31 -> "goose.tile.well";
+            case 52 -> "goose.tile.prison";
+            case 42 -> "goose.tile.labyrinth";
+            case 6, 12 -> "goose.tile.bridge"; // Assuming bridge logic
+            default -> (number % 9 == 0) ? "goose.tile.goose" : null;
+        };
+
+        if (tooltipKey != null) {
+            Tooltip.install(tile, new Tooltip(I18n.get(tooltipKey)));
+        }
+
         bg.setStroke(Color.GRAY);
 
         Label numLbl = new Label(String.valueOf(number));
@@ -153,10 +170,10 @@ public class GooseFXPanel extends BorderPane {
 
             // Update status
             if (rules.isFinished()) {
-                statusLabel.setText("Game Over! Winner: " + rules.getWinner().getName());
+                statusLabel.setText(I18n.format("goose.status.win", rules.getWinner().getName()));
             } else {
                 int currentPlayer = rules.getTurnIndex() + 1; // 1-based usually
-                statusLabel.setText("Player " + currentPlayer + "'s Turn");
+                statusLabel.setText(I18n.format("goose.status.turn", currentPlayer));
             }
         }
     }
@@ -164,7 +181,7 @@ public class GooseFXPanel extends BorderPane {
     private void startNewGame() {
         rules.startGame();
         render();
-        statusLabel.setText("Game Started. Player 1's Turn.");
+        statusLabel.setText(I18n.get("goose.status.start"));
     }
 
     private void render() {

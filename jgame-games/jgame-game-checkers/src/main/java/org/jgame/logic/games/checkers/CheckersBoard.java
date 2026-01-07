@@ -66,4 +66,16 @@ public class CheckersBoard extends AbstractBoard {
         }
         return pieces;
     }
+
+    public CheckersBoard copy() {
+        CheckersBoard newBoard = new CheckersBoard();
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                if (grid[r][c] != null) {
+                    newBoard.setPiece(r, c, grid[r][c].copy());
+                }
+            }
+        }
+        return newBoard;
+    }
 }

@@ -1,3 +1,4 @@
+
 /*
  * MIT License
  *
@@ -23,8 +24,13 @@
  */
 package org.jgame.logic.engine;
 
+import org.jgame.logic.ActionInterface;
+import org.jgame.logic.Rule;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,7 +56,12 @@ public record GameAction(
         String playerId,
         String actionType,
         Map<String, Object> parameters,
-        Instant timestamp) implements Serializable {
+        Instant timestamp) implements ActionInterface, Serializable {
+
+    @Override
+    public void applyRule(@NotNull Rule rule, @NotNull List<Object> parameters) {
+        // Default implementation for generic actions
+    }
 
     /** Action type for moving a piece */
     public static final String TYPE_MOVE = "MOVE";

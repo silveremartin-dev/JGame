@@ -119,6 +119,76 @@ public class SolitaireRules extends org.jgame.logic.games.AbstractBoardGame {
         return true;
     }
 
+    public void flipTableauCard(int index) {
+        Stack<Card> s = tableaus.get(index);
+        if (!s.isEmpty() && !s.peek().isFaceUp()) {
+            s.peek().setFaceUp(true);
+        }
+    }
+
+    public boolean moveWasteToTableau(int tableauIndex) {
+        if (waste.isEmpty())
+            return false;
+        Card c = waste.peek();
+        Stack<Card> t = tableaus.get(tableauIndex);
+        if (canMoveToTableau(c, t)) {
+            t.push(waste.pop());
+            return true;
+        }
+        return false;
+    }
+
+    public boolean moveWasteToFoundation(int foundationIndex) {
+        if (waste.isEmpty())
+            return false;
+        Card c = waste.peek();
+        Stack<Card> f = foundations.get(foundationIndex);
+        if (canMoveToFoundation(c, f)) {
+            f.push(waste.pop());
+            return true;
+        }
+        return false;
+    }
+
+    public boolean moveTableauToTableau(int fromIndex, int cardIndex, int toIndex) {
+        Stack<Card> from = tableaus.get(fromIndex);
+        Stack<Card> to = tableaus.get(toIndex);
+        if (from.isEmpty() || cardIndex < 0 || cardIndex >= from.size())
+            return false;
+
+        Card bottomCard = from.get(cardIndex);
+        if (!bottomCard.isFaceUp())
+            return false;
+
+        if (canMoveToTableau(bottomCard, to)) {
+            List<Card> moveList = new ArrayList<>(from.subList(cardIndex, from.size()));
+            from.setSize(cardIndex); // Remove moved cards
+            to.addAll(moveList);
+            if (!from.isEmpty() && !from.peek().isFaceUp()) {
+                // We don't auto-flip here, usually it's manual click or handled by UI
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public boolean moveTableauToFoundation(int tableauIndex, int foundationIndex) {
+        return moveCardToFoundation(tableauIndex, foundationIndex);
+    }
+
+    public boolean moveFoundationToTableau(int foundationIndex, int tableauIndex) {
+        Stack<Card> f = foundations.get(foundationIndex);
+        Stack<Card> t = tableaus.get(tableauIndex);
+        if (f.isEmpty())
+            return false;
+        Card c = f.peek();
+        if (canMoveToTableau(c, t)) {
+            t.push(f.pop());
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public org.jgame.parts.BoardInterface getBoard() {
         return null;

@@ -1,12 +1,16 @@
 package org.jgame.logic.games.checkers;
 
+import org.jgame.logic.ActionInterface;
+import org.jgame.logic.engine.GameAction;
+import org.jgame.logic.engine.GameState;
 import org.jgame.logic.games.AbstractBoardGame;
 import org.jgame.model.GameUser;
 import org.jgame.parts.PlayerInterface;
 import org.jgame.parts.BoardInterface;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of American Checkers (Draughts) rules.
@@ -410,6 +414,14 @@ public class CheckersRules extends AbstractBoardGame {
         return currentPlayer;
     }
 
+    public void setCurrentPlayer(int player) {
+        this.currentPlayer = player;
+    }
+
+    public void setMultiJumpInProgress(boolean inProgress) {
+        this.multiJumpInProgress = inProgress;
+    }
+
     public boolean isGameOver() {
         return gameOver;
     }
@@ -447,6 +459,78 @@ public class CheckersRules extends AbstractBoardGame {
             sb.append("\n");
         }
         return sb.toString();
+    }
+
+    @Override
+    public GameState toGameState() {
+        List<String> playerIds = getPlayers().stream()
+                .map(PlayerInterface::getId)
+                .collect(Collectors.toList());
+
+        Map<String, Object> boardState = new HashMap<>();
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                CheckersPiece p = board.getPiece(r, c);
+                if (p != null) {
+                    boardState.put(r + "," + c, p.getPlayer() + ":" + p.isKing());
+                }
+            }
+        }
+
+        return new GameState(
+                "checkers",
+                UUID.randomUUID().toString(),
+                playerIds,
+                currentPlayer - 1,
+                0,
+                gameOver ? GameState.GamePhase.FINISHED : GameState.GamePhase.PLAYING,
+                boardState,
+                Map.of(),
+                getLegalActions(getPlayers().get(currentPlayer - 1)).stream()
+                        .map(a -> (GameAction) a)
+                        .collect(Collectors.toList()),
+                List.of(),
+                Instant.now(),
+                Instant.now());
+    }
+
+    @Override
+    public Set<ActionInterface> getLegalActions(PlayerInterface player) {
+        Set<ActionInterface> actions = new HashSet<>();
+        if (gameOver)
+            return actions;
+
+        int playerIdx = getPlayers().indexOf(player);
+        if (playerIdx + 1 != currentPlayer)
+            return actions;
+
+        List<CheckersMove> moves = getAllLegalMoves();
+        for (CheckersMove move : moves) {
+            Map<String, Object> params = Map.of(
+                    "fromRow", move.getFromRow(),
+                    "fromCol", move.getFromCol(),
+                    "toRow", move.getToRow(),
+                    "toCol", move.getToCol());
+            actions.add(GameAction.create(player.getId(), GameAction.TYPE_MOVE, params));
+        }
+        return actions;
+    }
+
+    @Override
+    public void executeAction(PlayerInterface player, ActionInterface action) {
+        if (action instanceof GameAction ga && GameAction.TYPE_MOVE.equals(ga.actionType())) {
+            int fromRow = (int) ga.parameters().get("fromRow");
+            int fromCol = (int) ga.parameters().get("fromCol");
+            int toRow = (int) ga.parameters().get("toRow");
+            int toCol = (int) ga.parameters().get("toCol");
+
+            CheckersMove move = new CheckersMove(fromRow, fromCol, toRow, toCol);
+            makeMove(move);
+        }
+    }
+
+    public void initializeGame() {
+        initGame();
     }
 
     public String getGameName() {

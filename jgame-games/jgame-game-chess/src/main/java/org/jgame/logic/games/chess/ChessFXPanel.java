@@ -30,9 +30,22 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.animation.TranslateTransition;
+import javafx.util.Duration;
 
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import org.jgame.ai.GameAI;
+import org.jgame.ai.RandomAI;
+import org.jgame.logic.engine.GameAction;
+import org.jgame.model.GameUser;
+import org.jgame.parts.PlayerInterface;
+import org.jgame.parts.players.GamePlayer;
+import org.jgame.utils.SoundManager;
+
+import java.util.Optional;
 
 /**
  * JavaFX panel for Chess game.
@@ -106,6 +119,13 @@ public class ChessFXPanel extends BorderPane {
     }
 
     private void handleClick(int row, int col) {
+        // Prevent interaction if it's an AI's turn
+        PlayerInterface currentPlayer = rules.getPlayers()
+                .get(rules.getCurrentTurn() == ChessPiece.Color.WHITE ? 0 : 1);
+        if (currentPlayer instanceof GamePlayer gp && gp.getUser().getPlayerType() == GameUser.PlayerType.ARTIFICIAL) {
+            return;
+        }
+
         if (selectedRow == -1) {
             // First click - select piece
             ChessBoard board = (ChessBoard) rules.getBoard();
@@ -124,11 +144,19 @@ public class ChessFXPanel extends BorderPane {
             // Validate and execute move using rules
             ChessMove move = new ChessMove(selectedRow, selectedCol, row, col);
             if (rules.isValidMove(move)) {
-                if (rules.makeMove(move)) {
-                    updateStatus("Moved: " + from + " to " + to);
-                } else {
-                    updateStatus("Move rejected by rules: " + from + " to " + to);
-                }
+                // Apply move with animation
+                animateMove(move, () -> {
+                    // Check for promotion
+                    ChessPiece movingPiece = ((ChessBoard) rules.getBoard()).getPiece(move.fromRow(), move.fromCol());
+                    int promotionRow = (movingPiece.getColor() == ChessPiece.Color.WHITE) ? 0 : 7;
+
+                    if (movingPiece instanceof Pawn && move.toRow() == promotionRow) {
+                        showPromotionDialog(move.fromRow(), move.fromCol(), move.toRow(), move.toCol());
+                    } else {
+                        executeAndRender(move, from, to);
+                    }
+                });
+                return; // animateMove will call render
             } else {
                 // If clicking another own piece, select it instead
                 ChessBoard board = (ChessBoard) rules.getBoard();
@@ -146,7 +174,88 @@ public class ChessFXPanel extends BorderPane {
             selectedRow = -1;
             selectedCol = -1;
             render();
+            checkAndTriggerAI();
         }
+    }
+
+    private void executeAndRender(ChessMove move, String from, String to) {
+        ChessBoard boardBefore = ((ChessBoard) rules.getBoard()).copy();
+        if (rules.makeMove(move)) {
+            updateStatus("Moved: " + from + " to " + to);
+
+            // Play sounds
+            if (rules.isFinished()) {
+                if (rules.getWinner() != null)
+                    SoundManager.getInstance().playWin();
+                else
+                    SoundManager.getInstance().playLose();
+            } else {
+                ChessPiece captured = boardBefore.getPiece(move.toRow(), move.toCol());
+                if (captured != null || move.isEnPassant()) {
+                    SoundManager.getInstance().playCapture();
+                } else if (rules.isInCheck(rules.getCurrentTurn())) {
+                    SoundManager.getInstance().playCheck();
+                } else {
+                    SoundManager.getInstance().playMove();
+                }
+            }
+        } else {
+            updateStatus("Move rejected by rules: " + from + " to " + to);
+        }
+        selectedRow = -1;
+        selectedCol = -1;
+        render();
+        checkAndTriggerAI();
+    }
+
+    private void showPromotionDialog(int fromR, int fromC, int toR, int toC) {
+        javafx.scene.control.ChoiceDialog<String> dialog = new javafx.scene.control.ChoiceDialog<>("Queen", "Queen",
+                "Rook", "Bishop", "Knight");
+        dialog.setTitle("Pawn Promotion");
+        dialog.setHeaderText("Choose a piece to promote to:");
+        dialog.setContentText("Piece:");
+
+        Optional<String> result = dialog.showAndWait();
+        Class<? extends ChessPiece> selection = result.map(s -> switch (s) {
+            case "Rook" -> Rook.class;
+            case "Bishop" -> Bishop.class;
+            case "Knight" -> Knight.class;
+            default -> Queen.class;
+        }).orElse(Queen.class);
+
+        ChessMove promotionMove = ChessMove.promotion(fromR, fromC, toR, toC, selection);
+        executeAndRender(promotionMove, toChessNotation(fromR, fromC), toChessNotation(toR, toC));
+    }
+
+    private void animateMove(ChessMove move, Runnable onFinished) {
+        StackPane fromSquare = getSquare(move.fromRow(), move.fromCol());
+        if (fromSquare != null && !fromSquare.getChildren().isEmpty()) {
+            javafx.scene.Node pieceView = fromSquare.getChildren().get(0);
+
+            double deltaX = (move.toCol() - move.fromCol()) * SQUARE_SIZE;
+            double deltaY = (move.toRow() - move.fromRow()) * SQUARE_SIZE;
+
+            fromSquare.toFront(); // Note: toFront on GridPane node is good
+            TranslateTransition transition = new TranslateTransition(Duration.millis(300), pieceView);
+            transition.setByX(deltaX);
+            transition.setByY(deltaY);
+            transition.setOnFinished(e -> {
+                pieceView.setVisible(false);
+                Platform.runLater(onFinished);
+            });
+            transition.play();
+        } else {
+            onFinished.run();
+        }
+    }
+
+    private StackPane getSquare(int row, int col) {
+        for (javafx.scene.Node node : boardGrid.getChildren()) {
+            if (GridPane.getRowIndex(node) == row && GridPane.getColumnIndex(node) == col) {
+                return (StackPane) node;
+            }
+        }
+        return null;
     }
 
     private String toChessNotation(int row, int col) {
@@ -205,7 +314,7 @@ public class ChessFXPanel extends BorderPane {
             }
         }
 
-        // Update status text if needed based on game state
+        // Update status text based on game state
         if (rules.isFinished()) {
             statusLabel.setText(
                     "Game Over - Winner: " + (rules.getWinner() != null ? rules.getWinner().getName() : "Draw"));
@@ -263,41 +372,76 @@ public class ChessFXPanel extends BorderPane {
     // Let's assume images exist (Step 1743 found many images).
     // I'll stick to the plan but maybe log if null.
 
-    private String getPieceSymbolFallback(ChessPiece piece) {
-        if (piece.getColor() == ChessPiece.Color.WHITE) {
-            return switch (piece) {
-                case Pawn _ -> "♙";
-                case Knight _ -> "♘";
-                case Bishop _ -> "♗";
-                case Rook _ -> "♖";
-                case Queen _ -> "♕";
-                case King _ -> "♔";
-            };
-        } else {
-            return switch (piece) {
-                case Pawn _ -> "♟";
-                case Knight _ -> "♞";
-                case Bishop _ -> "♝";
-                case Rook _ -> "♜";
-                case Queen _ -> "♛";
-                case King _ -> "♚";
-            };
-        }
-    }
-
     private void newGame() {
         rules.initializeGame();
         selectedRow = -1;
         selectedCol = -1;
         render();
+        checkAndTriggerAI();
     }
 
     private void resign() {
-        // Logic for resign could be added to rules, for now just update UI
-        updateStatus("Resigned");
+        rules.resign();
+        render();
+        // Clear board after a short delay or show dialog
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle("Game Over");
+        alert.setHeaderText("Game Finished");
+        alert.setContentText("Status: " + statusLabel.getText() + "\nLoading new game...");
+        alert.show();
+
+        javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(3));
+        pause.setOnFinished(e -> {
+            alert.close();
+            newGame();
+        });
+        pause.play();
     }
 
     public void updateStatus(String message) {
         statusLabel.setText(message);
+    }
+
+    private void checkAndTriggerAI() {
+        if (rules.isFinished())
+            return;
+
+        PlayerInterface currentPlayer = rules.getPlayers()
+                .get(rules.getCurrentTurn() == ChessPiece.Color.WHITE ? 0 : 1);
+        if (currentPlayer instanceof GamePlayer gp && gp.getUser().getPlayerType() == GameUser.PlayerType.ARTIFICIAL) {
+            String aiType = gp.getUser().getLogin();
+            GameAI ai = aiType.equals("AI_MINIMAX") ? new ChessMinimaxAI(3) : new RandomAI();
+
+            updateStatus(ai.getName() + " is thinking...");
+
+            Task<GameAction> aiTask = new Task<>() {
+                @Override
+                protected GameAction call() {
+                    return ai.computeMove(rules.toGameState());
+                }
+            };
+
+            aiTask.setOnSucceeded(event -> {
+                GameAction action = aiTask.getValue();
+                if (action != null) {
+                    Platform.runLater(() -> {
+                        int fromRow = (int) action.parameters().get("fromRow");
+                        int fromCol = (int) action.parameters().get("fromCol");
+                        int toRow = (int) action.parameters().get("toRow");
+                        int toCol = (int) action.parameters().get("toCol");
+                        ChessMove move = new ChessMove(fromRow, fromCol, toRow, toCol);
+
+                        animateMove(move, () -> {
+                            rules.executeAction(currentPlayer, action);
+                            render();
+                            checkAndTriggerAI(); // Check if next player is also AI
+                        });
+                    });
+                }
+            });
+
+            new Thread(aiTask).start();
+        }
     }
 }

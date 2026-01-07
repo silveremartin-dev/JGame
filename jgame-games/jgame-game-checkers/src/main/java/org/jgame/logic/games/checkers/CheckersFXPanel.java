@@ -30,9 +30,20 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.animation.TranslateTransition;
+import javafx.util.Duration;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
+import org.jgame.ai.GameAI;
+import org.jgame.ai.RandomAI;
+import org.jgame.logic.engine.GameAction;
+import org.jgame.model.GameUser;
+import org.jgame.parts.PlayerInterface;
+import org.jgame.parts.players.GamePlayer;
+import org.jgame.utils.SoundManager;
 
 /**
  * JavaFX panel for Checkers game.
@@ -106,6 +117,12 @@ public class CheckersFXPanel extends BorderPane {
         if (rules.isFinished())
             return;
 
+        // Prevent interaction if it's an AI's turn
+        PlayerInterface currentPlayer = rules.getPlayers().get(rules.getCurrentPlayer() - 1);
+        if (currentPlayer instanceof GamePlayer gp && gp.getUser().getPlayerType() == GameUser.PlayerType.ARTIFICIAL) {
+            return;
+        }
+
         if (selectedRow == -1) {
             // Select piece
             CheckersPiece piece = rules.getPiece(row, col);
@@ -119,18 +136,38 @@ public class CheckersFXPanel extends BorderPane {
             // Move
             CheckersMove move = new CheckersMove(selectedRow, selectedCol, row, col);
             if (rules.isValidMove(move)) {
-                // Execute move
-                boolean turnComplete = rules.makeMove(move);
-                if (!turnComplete) {
-                    updateStatus("Multi-jump available! Continue jumping.");
-                    // Keep selection on the piece at new position
-                    selectedRow = row;
-                    selectedCol = col;
-                } else {
-                    selectedRow = -1;
-                    selectedCol = -1;
-                    updateStatus("Player " + rules.getCurrentPlayer() + "'s turn");
-                }
+                // Execute move with animation
+                animateMove(move, () -> {
+                    CheckersBoard boardBefore = rules.getCheckersBoard().copy();
+                    boolean turnComplete = rules.makeMove(move);
+
+                    // Play sounds
+                    if (rules.isFinished()) {
+                        SoundManager.getInstance().playWin();
+                    } else {
+                        // Check if a piece was captured (board changed at intermediate squares for
+                        // jump)
+                        if (isCapture(boardBefore, rules.getCheckersBoard(), move)) {
+                            SoundManager.getInstance().playCapture();
+                        } else {
+                            SoundManager.getInstance().playMove();
+                        }
+                    }
+
+                    if (!turnComplete) {
+                        updateStatus("Multi-jump available! Continue jumping.");
+                        // Keep selection on the piece at new position
+                        selectedRow = row;
+                        selectedCol = col;
+                    } else {
+                        selectedRow = -1;
+                        selectedCol = -1;
+                        updateStatus("Player " + rules.getCurrentPlayer() + "'s turn");
+                    }
+                    render();
+                    checkAndTriggerAI();
+                });
+                return;
             } else {
                 // Deselect or select new piece
                 CheckersPiece piece = rules.getPiece(row, col);
@@ -145,7 +182,65 @@ public class CheckersFXPanel extends BorderPane {
                 }
             }
             render();
+            checkAndTriggerAI();
         }
+    }
+
+    private boolean isCapture(CheckersBoard before, CheckersBoard after, CheckersMove move) {
+        // Simple heuristic: if the number of pieces decreased, it's a capture.
+        return countPieces(before) > countPieces(after);
+    }
+
+    private int countPieces(CheckersBoard board) {
+        int count = 0;
+        for (int r = 0; r < BOARD_SIZE; r++) {
+            for (int c = 0; c < BOARD_SIZE; c++) {
+                if (board.getPiece(r, c) != null)
+                    count++;
+            }
+        }
+        return count;
+    }
+
+    private void animateMove(CheckersMove move, Runnable onFinished) {
+        StackPane fromSquare = getSquare(move.getFromRow(), move.getFromCol());
+        if (fromSquare != null && !fromSquare.getChildren().isEmpty()) {
+            // Find the ImageView (might be wrapped or have a Label for King)
+            javafx.scene.Node pieceNode = null;
+            for (javafx.scene.Node node : fromSquare.getChildren()) {
+                if (node instanceof ImageView) {
+                    pieceNode = node;
+                    break;
+                }
+            }
+
+            if (pieceNode != null) {
+                final javafx.scene.Node finalPieceNode = pieceNode;
+                double deltaX = (move.getToCol() - move.getFromCol()) * SQUARE_SIZE;
+                double deltaY = (move.getToRow() - move.getFromRow()) * SQUARE_SIZE;
+
+                TranslateTransition transition = new TranslateTransition(Duration.millis(300), finalPieceNode);
+                transition.setByX(deltaX);
+                transition.setByY(deltaY);
+                transition.setOnFinished(e -> {
+                    finalPieceNode.setTranslateX(0);
+                    finalPieceNode.setTranslateY(0);
+                    onFinished.run();
+                });
+                transition.play();
+                return;
+            }
+        }
+        onFinished.run();
+    }
+
+    private StackPane getSquare(int row, int col) {
+        for (javafx.scene.Node node : boardGrid.getChildren()) {
+            if (GridPane.getRowIndex(node) == row && GridPane.getColumnIndex(node) == col) {
+                return (StackPane) node;
+            }
+        }
+        return null;
     }
 
     private void render() {
@@ -232,9 +327,51 @@ public class CheckersFXPanel extends BorderPane {
         selectedCol = -1;
         render();
         updateStatus("New Game Started. Player 1's turn.");
+        checkAndTriggerAI();
     }
 
     private void updateStatus(String msg) {
         statusLabel.setText(msg);
+    }
+
+    private void checkAndTriggerAI() {
+        if (rules.isFinished())
+            return;
+
+        PlayerInterface currentPlayer = rules.getPlayers().get(rules.getCurrentPlayer() - 1);
+        if (currentPlayer instanceof GamePlayer gp && gp.getUser().getPlayerType() == GameUser.PlayerType.ARTIFICIAL) {
+            String aiType = gp.getUser().getLogin();
+            GameAI ai = aiType.equals("AI_MINIMAX") ? new CheckersMinimaxAI(3) : new RandomAI();
+
+            updateStatus(ai.getName() + " is thinking...");
+
+            Task<GameAction> aiTask = new Task<>() {
+                @Override
+                protected GameAction call() {
+                    return ai.computeMove(rules.toGameState());
+                }
+            };
+
+            aiTask.setOnSucceeded(event -> {
+                GameAction action = aiTask.getValue();
+                if (action != null) {
+                    Platform.runLater(() -> {
+                        int fromRow = (int) action.parameters().get("fromRow");
+                        int fromCol = (int) action.parameters().get("fromCol");
+                        int toRow = (int) action.parameters().get("toRow");
+                        int toCol = (int) action.parameters().get("toCol");
+                        CheckersMove move = new CheckersMove(fromRow, fromCol, toRow, toCol);
+
+                        animateMove(move, () -> {
+                            rules.executeAction(currentPlayer, action);
+                            render();
+                            checkAndTriggerAI();
+                        });
+                    });
+                }
+            });
+
+            new Thread(aiTask).start();
+        }
     }
 }
