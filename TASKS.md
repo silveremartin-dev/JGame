@@ -26,6 +26,7 @@ La classe `SolitaireRules` est actuellement une version simplifiée.
 - [x] **Traduction Complète** : Assurer une couverture i18n à 100% sur le client web (FR, EN, DE, ES, ZH ajoutés).
 - [x] **Connexion API** : Vérifier l'intégration complète avec `jgame-server` pour l'authentification et la sauvegarde des scores.
 - [x] **Compléter i18n** : Vérifier que tous les messages d'erreur et états dynamiques utilisent bien `i18n.t()`.
+- [x] **Découverte Langues** : Charger dynamiquement les langues disponibles depuis `messages.properties` dans le Client Java.
 
 ## 4. Améliorations UI/UX (JavaFX) (Priorité Moyenne)
 
@@ -37,12 +38,13 @@ La classe `SolitaireRules` est actuellement une version simplifiée.
 
 - [x] **Tests Solitaire** : Nettoyer `SolitaireUITest` pour ne plus dépendre de contournements (Refactorisé avec TestFX clickOn).
 - [x] **Couverture de Code** : Augmenter la couverture de tests pour `jgame-core` et `jgame-server` (Ajout ClientDiscoveryTest).
+- [x] **Tests Client UI** : Créer `ClientUITest` (Mock Server) pour valider l'interface.
 
 ## 6. Serveur et Base de Données (Priorité Basse)
 
 - [x] **Persistance Complète** : S'assurer que les parties sauvegardées conservent l'état exact (positions des pièces) via `jgame-persistence`.
-- [ ] **Sécurité** : Auditer l'API REST pour s'assurer que les tokens JWT sont bien validés partout.
+- [x] **Sécurité** : Auditer l'API REST pour s'assurer que les tokens JWT sont bien validés partout.
 
 ## 7. Documentation
 
-- [ ] **Wiki Complet** : Mettre à jour le Wiki ou les fichiers Markdown avec des guides pour ajouter un nouveau jeu.
+- [x] **Wiki Complet** : Mettre à jour le Wiki ou les fichiers Markdown avec des guides pour ajouter un nouveau jeu (walkthrough.md mis à jour).

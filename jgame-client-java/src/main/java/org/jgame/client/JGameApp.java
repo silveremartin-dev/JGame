@@ -341,8 +341,23 @@ public class JGameApp extends Application {
         langRow.setAlignment(Pos.CENTER_LEFT);
         Label langLabel = new Label("Language:");
         langLabel.setStyle("-fx-text-fill: white;");
+
         ComboBox<String> langBox = new ComboBox<>();
-        langBox.getItems().addAll("English", "Français", "Deutsch", "Español");
+        // Dynamically populate languages
+        java.util.List<String> languages = new java.util.ArrayList<>();
+        languages.add("English"); // Default
+
+        // Check for other locales
+        if (getClass().getResource("/i18n/messages_fr.properties") != null)
+            languages.add("Français");
+        if (getClass().getResource("/i18n/messages_de.properties") != null)
+            languages.add("Deutsch");
+        if (getClass().getResource("/i18n/messages_es.properties") != null)
+            languages.add("Español");
+        if (getClass().getResource("/i18n/messages_zh.properties") != null)
+            languages.add("中文 (Chinese)");
+
+        langBox.getItems().addAll(languages);
         langBox.setValue("English");
         langRow.getChildren().addAll(langLabel, langBox);
 
