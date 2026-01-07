@@ -34,6 +34,8 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jgame.model.GameUser;
+import org.jgame.logic.games.AbstractGame;
 
 /**
  * JavaFX main application for JGame client.
@@ -564,17 +566,15 @@ public class JGameApp extends Application {
                 gameId = "solitaire";
 
             // Local Play Configuration
+            GameConfigDialog.GameConfig config = null;
             if (gameId.equals("chess") || gameId.equals("checkers")) {
                 GameConfigDialog configDialog = new GameConfigDialog(gameName);
                 java.util.Optional<GameConfigDialog.GameConfig> result = configDialog.showAndWait();
 
                 if (result.isPresent()) {
-                    GameConfigDialog.GameConfig config = result.get();
+                    config = result.get();
                     logger.info("Starting {} with Config: P1={}, P2={}, AI={}", gameName, config.p1Type(),
                             config.p2Type(), config.aiLevel());
-                    // TODO: Pass config to Rules/Panel constructors when AI is fully implemented
-                    // For now, we proceed with default rules but log the intent so user sees we
-                    // handled it.
                 } else {
                     return; // User cancelled
                 }
@@ -584,11 +584,13 @@ public class JGameApp extends Application {
                 case "chess" -> {
                     org.jgame.logic.games.chess.ChessRules rules = new org.jgame.logic.games.chess.ChessRules();
                     rules.initializeGame();
+                    configurePlayers(rules, config);
                     gamePanel = new org.jgame.logic.games.chess.ChessFXPanel(rules);
                 }
                 case "checkers" -> {
                     org.jgame.logic.games.checkers.CheckersRules rules = new org.jgame.logic.games.checkers.CheckersRules();
                     rules.initGame();
+                    configurePlayers(rules, config);
                     gamePanel = new org.jgame.logic.games.checkers.CheckersFXPanel(rules);
                 }
                 case "goose" -> {
@@ -619,6 +621,34 @@ public class JGameApp extends Application {
             logger.error("Failed to launch game " + gameName, e);
             showError("Launch Error", "Could not start game: " + e.getMessage());
         }
+    }
+
+    private void configurePlayers(AbstractGame rules, GameConfigDialog.GameConfig config) {
+        // Clear existing players (if any were added by initialization)
+        rules.getPlayers().clear();
+
+        if (config != null) {
+            // Player 1
+            GameUser p1 = new GameUser("Player 1");
+            p1.setPlayerType(convertType(config.p1Type()));
+            rules.addPlayer(p1);
+
+            // Player 2
+            GameUser p2 = new GameUser("Player 2");
+            p2.setPlayerType(convertType(config.p2Type()));
+            rules.addPlayer(p2);
+        } else {
+            // Default: Human vs Human
+            rules.addPlayer(new GameUser("Player 1"));
+            rules.addPlayer(new GameUser("Player 2"));
+        }
+    }
+
+    private GameUser.PlayerType convertType(GameConfigDialog.PlayerType type) {
+        return switch (type) {
+            case HUMAN -> GameUser.PlayerType.HUMAN;
+            case AI_RANDOM, AI_MINIMAX -> GameUser.PlayerType.ARTIFICIAL;
+        };
     }
 
     private void refreshUI() {

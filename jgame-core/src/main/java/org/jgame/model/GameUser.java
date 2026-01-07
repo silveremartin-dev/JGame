@@ -45,6 +45,14 @@ public class GameUser {
     private String operatingSystem;
     private String operatingSystemVersion;
 
+    public enum PlayerType {
+        HUMAN,
+        ARTIFICIAL,
+        NETWORK
+    }
+
+    private PlayerType playerType = PlayerType.HUMAN;
+
     public GameUser(@NotNull String login, @NotNull String password) {
         if ((login != null) && (password != null)) {
             this.login = login;
@@ -137,6 +145,18 @@ public class GameUser {
             this.operatingSystemVersion = operatingSystemVersion;
         } else
             throw new IllegalArgumentException("You cannot set a null operating system version.");
+    }
+
+    public PlayerType getPlayerType() {
+        return playerType;
+    }
+
+    public void setPlayerType(@NotNull PlayerType playerType) {
+        if (playerType != null) {
+            this.playerType = playerType;
+        } else {
+            throw new IllegalArgumentException("Player type cannot be null");
+        }
     }
 
 }

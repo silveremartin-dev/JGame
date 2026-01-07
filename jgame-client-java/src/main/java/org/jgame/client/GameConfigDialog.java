@@ -7,7 +7,24 @@ import javafx.stage.Modality;
 
 public class GameConfigDialog extends Dialog<GameConfigDialog.GameConfig> {
 
-    public record GameConfig(String p1Type, String p2Type, String aiLevel) {
+    public enum PlayerType {
+        HUMAN("Human"),
+        AI_RANDOM("AI (Random)"),
+        AI_MINIMAX("AI (Minimax)");
+
+        private final String label;
+
+        PlayerType(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
+
+    public record GameConfig(PlayerType p1Type, PlayerType p2Type, String aiLevel) {
     }
 
     public GameConfigDialog(String gameName) {
@@ -23,13 +40,13 @@ public class GameConfigDialog extends Dialog<GameConfigDialog.GameConfig> {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        ComboBox<String> p1Type = new ComboBox<>();
-        p1Type.getItems().addAll("Human", "AI (Random)", "AI (Minimax)");
-        p1Type.setValue("Human");
+        ComboBox<PlayerType> p1Type = new ComboBox<>();
+        p1Type.getItems().addAll(PlayerType.values());
+        p1Type.setValue(PlayerType.HUMAN);
 
-        ComboBox<String> p2Type = new ComboBox<>();
-        p2Type.getItems().addAll("Human", "AI (Random)", "AI (Minimax)");
-        p2Type.setValue("Human"); // Default to Human vs Human
+        ComboBox<PlayerType> p2Type = new ComboBox<>();
+        p2Type.getItems().addAll(PlayerType.values());
+        p2Type.setValue(PlayerType.HUMAN);
 
         ComboBox<String> aiLevel = new ComboBox<>();
         aiLevel.getItems().addAll("Easy", "Medium", "Hard");
@@ -57,8 +74,8 @@ public class GameConfigDialog extends Dialog<GameConfigDialog.GameConfig> {
         });
     }
 
-    private void updateAiLevelState(ComboBox<String> p1, ComboBox<String> p2, ComboBox<String> level) {
-        boolean hasAi = p1.getValue().contains("AI") || p2.getValue().contains("AI");
+    private void updateAiLevelState(ComboBox<PlayerType> p1, ComboBox<PlayerType> p2, ComboBox<String> level) {
+        boolean hasAi = p1.getValue() != PlayerType.HUMAN || p2.getValue() != PlayerType.HUMAN;
         level.setDisable(!hasAi);
     }
 }
