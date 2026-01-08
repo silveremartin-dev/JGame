@@ -28,7 +28,7 @@ jobs:
               run: mvn -B package --file pom.xml -Dmaven.compiler.showDeprecation=true
 
             - name: Run Tests with Coverage
-              run: mvn -B verify --file pom.xml
+              run: mvn -B verify --file pom.xml -Dheadless=true
 
             - name: Helper - List Coverage
               run: |

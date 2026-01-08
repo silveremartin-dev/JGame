@@ -6,18 +6,15 @@ import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
+import org.jgame.ui.test.BaseUITest;
 
-@ExtendWith(ApplicationExtension.class)
-public class ClientUITest {
+public class ClientUITest extends BaseUITest {
 
     private JGameApp app;
 
-    @Start
-    public void start(Stage stage) {
+    @Override
+    protected void setupStage(Stage stage) throws Exception {
         app = new JGameApp();
         app.start(stage);
     }

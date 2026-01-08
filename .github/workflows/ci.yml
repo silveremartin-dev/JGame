@@ -28,7 +28,7 @@ jobs:
       run: mvn clean compile -DskipTests
 
     - name: Run tests
-      run: mvn test
+      run: mvn test -Dheadless=true
 
     - name: Package
       run: mvn package -DskipTests
