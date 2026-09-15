@@ -30,6 +30,8 @@ import org.apache.logging.log4j.Logger;
 import org.jgame.server.persistence.dao.UserDAO;
 import org.jgame.server.persistence.dao.UserGameStatsDAO;
 import org.jgame.server.auth.JwtAuthHandler;
+import org.jgame.server.security.InputValidator;
+import org.jgame.server.security.RateLimiter;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +40,7 @@ import java.util.Map;
  * REST API controller for user operations.
  *
  * @author Silvere Martin-Michiellot
- * @version 2.0
+ * @version 2.1
  */
 public class UserApiController {
 
@@ -48,6 +50,7 @@ public class UserApiController {
     private final UserDAO userDAO;
     private final UserGameStatsDAO statsDAO;
     private final JwtAuthHandler jwtHandler;
+    private final RateLimiter authRateLimiter;
 
     /**
      * Creates a new UserApiController with injected dependencies.
@@ -57,9 +60,17 @@ public class UserApiController {
      * @param jwtHandler JWT authentication handler
      */
     public UserApiController(UserDAO userDAO, UserGameStatsDAO statsDAO, JwtAuthHandler jwtHandler) {
+        this(userDAO, statsDAO, jwtHandler, RateLimiter.loginLimiter());
+    }
+
+    /**
+     * Creates a new UserApiController with custom rate limiter (for testing).
+     */
+    public UserApiController(UserDAO userDAO, UserGameStatsDAO statsDAO, JwtAuthHandler jwtHandler, RateLimiter rateLimiter) {
         this.userDAO = userDAO;
         this.statsDAO = statsDAO;
         this.jwtHandler = jwtHandler;
+        this.authRateLimiter = rateLimiter;
     }
 
     /**
@@ -67,10 +78,33 @@ public class UserApiController {
      */
     public void register(Context ctx) {
         try {
-            RegisterRequest req = gson.fromJson(ctx.body(), RegisterRequest.class);
+            String clientIp = ctx.ip();
+            if (authRateLimiter != null && !authRateLimiter.tryAcquire(clientIp)) {
+                ctx.status(429).json(Map.of("error", "Too many requests. Please try again later."));
+                return;
+            }
 
-            if (req.username == null || req.password == null) {
-                ctx.status(400).json(Map.of("error", "Username and password required"));
+            RegisterRequest req = gson.fromJson(ctx.body(), RegisterRequest.class);
+            if (req == null) {
+                ctx.status(400).json(Map.of("error", "Invalid request body"));
+                return;
+            }
+
+            var userVal = InputValidator.validateUsername(req.username);
+            if (!userVal.isValid()) {
+                ctx.status(400).json(Map.of("error", userVal.message()));
+                return;
+            }
+
+            var passVal = InputValidator.validatePassword(req.password);
+            if (!passVal.isValid()) {
+                ctx.status(400).json(Map.of("error", passVal.message()));
+                return;
+            }
+
+            var emailVal = InputValidator.validateEmail(req.email);
+            if (!emailVal.isValid()) {
+                ctx.status(400).json(Map.of("error", emailVal.message()));
                 return;
             }
 
@@ -79,13 +113,10 @@ public class UserApiController {
                 return;
             }
 
-            // In a real app, hash the password!
-            // For now, assuming raw password for demo (BAD PRACTICE, fix in security
-            // update)
             long userId = userDAO.createUser(req.username, req.password, req.email);
 
             if (userId != -1) {
-                String token = jwtHandler.generateToken(req.username, "user");
+                String token = jwtHandler.generateToken(String.valueOf(userId), req.username);
                 ctx.status(201).json(Map.of("token", token, "username", req.username));
             } else {
                 ctx.status(500).json(Map.of("error", "Failed to create user"));
@@ -102,12 +133,22 @@ public class UserApiController {
      */
     public void login(Context ctx) {
         try {
+            String clientIp = ctx.ip();
+            if (authRateLimiter != null && !authRateLimiter.tryAcquire(clientIp)) {
+                ctx.status(429).json(Map.of("error", "Too many login attempts. Please try again later."));
+                return;
+            }
+
             LoginRequest req = gson.fromJson(ctx.body(), LoginRequest.class);
+            if (req == null || req.username == null || req.password == null) {
+                ctx.status(400).json(Map.of("error", "Username and password required"));
+                return;
+            }
 
             long userId = userDAO.verifyCredentials(req.username, req.password);
 
             if (userId != -1) {
-                String token = jwtHandler.generateToken(req.username, "user");
+                String token = jwtHandler.generateToken(String.valueOf(userId), req.username);
                 ctx.json(Map.of("token", token, "username", req.username));
             } else {
                 ctx.status(401).json(Map.of("error", "Invalid credentials"));
@@ -120,12 +161,27 @@ public class UserApiController {
     }
 
     /**
-     * GET /api/users/me
+     * POST /api/auth/logout
+     */
+    public void logout(Context ctx) {
+        String authHeader = ctx.header("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            jwtHandler.revokeToken(token);
+        }
+        ctx.json(Map.of("message", "Logged out successfully"));
+    }
+
+    /**
+     * GET /api/user/profile
      */
     public void getProfile(Context ctx) {
         String username = ctx.attribute("username");
-        // Simplified profile response
-        ctx.json(Map.of("username", username, "role", "user"));
+        String userId = ctx.attribute("userId");
+        ctx.json(Map.of(
+                "userId", userId != null ? userId : "",
+                "username", username != null ? username : "",
+                "role", "user"));
     }
 
     /**
@@ -133,7 +189,32 @@ public class UserApiController {
      */
     public void updateProfile(Context ctx) {
         String username = ctx.attribute("username");
+        if (username == null) {
+            ctx.status(401).json(Map.of("error", "Unauthorized"));
+            return;
+        }
+
         UpdateProfileRequest req = gson.fromJson(ctx.body(), UpdateProfileRequest.class);
+        if (req == null) {
+            ctx.status(400).json(Map.of("error", "Invalid request body"));
+            return;
+        }
+
+        if (req.email != null && !req.email.isBlank()) {
+            var emailVal = InputValidator.validateEmail(req.email);
+            if (!emailVal.isValid()) {
+                ctx.status(400).json(Map.of("error", emailVal.message()));
+                return;
+            }
+        }
+
+        if (req.password != null && !req.password.isBlank()) {
+            var passVal = InputValidator.validatePassword(req.password);
+            if (!passVal.isValid()) {
+                ctx.status(400).json(Map.of("error", passVal.message()));
+                return;
+            }
+        }
 
         if (userDAO.updateUser(username, req.email, req.password)) {
             ctx.json(Map.of("message", "Profile updated successfully"));
@@ -147,11 +228,16 @@ public class UserApiController {
      */
     public void getScores(Context ctx) {
         String username = ctx.attribute("username");
+        if (username == null) {
+            ctx.status(401).json(Map.of("error", "Unauthorized"));
+            return;
+        }
+
         try {
             List<?> scores = statsDAO.getAllStatsForUser(username);
             ctx.json(scores);
         } catch (Exception e) {
-            logger.error("Error getting scores", e);
+            logger.error("Error getting scores for user {}", username, e);
             ctx.status(500).json(Map.of("error", "Internal server error"));
         }
     }

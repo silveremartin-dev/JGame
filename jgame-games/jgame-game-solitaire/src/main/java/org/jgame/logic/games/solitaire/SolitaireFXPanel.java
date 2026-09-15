@@ -246,6 +246,7 @@ public class SolitaireFXPanel extends BorderPane {
 
             wasteNode.getStyleClass().add("waste-pile");
             wasteNode.getStyleClass().add("card");
+            wasteNode.getStyleClass().add("waste-card");
             if (selectedType == 0) {
                 wasteNode.getStyleClass().add("selected");
                 wasteNode.setStyle("-fx-effect: dropshadow(three-pass-box, yellow, 10, 0, 0, 0);");
@@ -441,6 +442,7 @@ public class SolitaireFXPanel extends BorderPane {
         back.setStrokeWidth(2);
 
         StackPane p = new StackPane(back);
+        p.setPrefSize(CARD_WIDTH, CARD_HEIGHT);
         p.getStyleClass().add("card-back");
         return p;
     }

@@ -215,6 +215,7 @@ public class JGameServer {
         // Public routes
         app.post("/api/auth/register", userController::register);
         app.post("/api/auth/login", userController::login);
+        app.post("/api/auth/logout", userController::logout);
         app.get("/api/games", gameController::listGames);
         app.get("/api/games/{gameId}", gameController::getGame);
         app.get("/api/games/{gameId}/ratings", ratingController::getGameRatings);

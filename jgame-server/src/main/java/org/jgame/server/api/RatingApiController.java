@@ -29,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jgame.model.GameRating;
 import org.jgame.server.persistence.dao.RatingDAO;
+import org.jgame.server.security.HtmlSanitizer;
 
 import java.util.List;
 import java.util.Map;
@@ -91,7 +92,8 @@ public class RatingApiController {
                 return;
             }
 
-            GameRating rating = GameRating.create(username, gameId, req.stars, req.comment);
+            String sanitizedComment = req.comment != null ? HtmlSanitizer.sanitizeAndTruncate(req.comment, 500) : null;
+            GameRating rating = GameRating.create(username, gameId, req.stars, sanitizedComment);
             ratingDAO.saveRating(rating);
 
             logger.info("Rating created by {} for {}: {} stars", username, gameId, req.stars);
@@ -119,7 +121,8 @@ public class RatingApiController {
                 return;
             }
 
-            GameRating updated = existing.withStars(req.stars).withComment(req.comment);
+            String sanitizedComment = req.comment != null ? HtmlSanitizer.sanitizeAndTruncate(req.comment, 500) : null;
+            GameRating updated = existing.withStars(req.stars).withComment(sanitizedComment);
             ratingDAO.saveRating(updated);
 
             logger.info("Rating updated by {} for {}", username, gameId);

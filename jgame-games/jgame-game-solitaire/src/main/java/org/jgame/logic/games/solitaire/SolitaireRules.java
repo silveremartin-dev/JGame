@@ -21,6 +21,7 @@ public class SolitaireRules extends org.jgame.logic.games.AbstractBoardGame {
 
     public SolitaireRules() {
         super("Solitaire", "1.0", "Classic Klondike Solitaire");
+        initializeGameLogic();
     }
 
     @Override

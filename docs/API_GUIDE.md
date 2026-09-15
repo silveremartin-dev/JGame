@@ -1,13 +1,13 @@
 # JGame REST API Guide
 
-**Version**: 1.0  
-**Last Updated**: January 2026
+**Version**: 2.1  
+**Last Updated**: September 2026
 
 ---
 
 ## Overview
 
-JGame provides a RESTful API for game management, user authentication, scores, and ratings. The server is built with Javalin and uses JWT for authentication.
+JGame provides a high-performance RESTful API for user authentication, game catalog discovery, real-time lobbies, ratings, user profiles, and persistent leaderboards. The server is built with Javalin 6 and uses JWT (HMAC-SHA256) for stateful token validation and revocation.
 
 ## Base URL
 
@@ -17,7 +17,7 @@ http://localhost:8080/api
 
 ---
 
-## Authentication
+## Authentication & Session Management
 
 ### Register User
 
@@ -27,17 +27,17 @@ Content-Type: application/json
 
 {
   "username": "player1",
-  "password": "securepass123",
+  "password": "Password123!",
   "email": "player1@example.com"
 }
 ```
 
-**Response** (201 Created):
+**Response** (`201 Created`):
 
 ```json
 {
-  "success": true,
-  "message": "Registration successful"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "username": "player1"
 }
 ```
 
@@ -49,26 +49,39 @@ Content-Type: application/json
 
 {
   "username": "player1",
-  "password": "securepass123"
+  "password": "Password123!"
 }
 ```
 
-**Response** (200 OK):
+**Response** (`200 OK`):
 
 ```json
 {
-  "success": true,
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": 1,
-    "username": "player1"
-  }
+  "username": "player1"
+}
+```
+
+### Logout (Authenticated)
+
+Revokes the active JWT token and registers it in the server-side `TokenBlacklist`.
+
+```http
+POST /api/auth/logout
+Authorization: Bearer <token>
+```
+
+**Response** (`200 OK`):
+
+```json
+{
+  "message": "Logged out successfully"
 }
 ```
 
 ### Using JWT Token
 
-Include the token in subsequent requests:
+Include the token in the `Authorization` header for protected endpoints:
 
 ```http
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -76,89 +89,44 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
-## Games
-
-### List All Games
-
-```http
-GET /api/games
-```
-
-**Response**:
-
-```json
-{
-  "games": [
-    {
-      "id": "chess",
-      "name": "Chess",
-      "description": "Classic 2-player strategy",
-      "minPlayers": 2,
-      "maxPlayers": 2
-    },
-    {
-      "id": "checkers",
-      "name": "Checkers",
-      "description": "Jump and capture",
-      "minPlayers": 2,
-      "maxPlayers": 2
-    }
-  ]
-}
-```
-
-### Get Game Details
-
-```http
-GET /api/games/{gameId}
-```
-
-**Response**:
-
-```json
-{
-  "id": "chess",
-  "name": "Chess",
-  "description": "Classic 2-player strategy game",
-  "minPlayers": 2,
-  "maxPlayers": 2,
-  "averageRating": 4.5,
-  "totalRatings": 127
-}
-```
-
----
-
-## Ratings
-
-### Get Game Ratings
-
-```http
-GET /api/games/{gameId}/ratings
-```
-
-### Submit Rating (Authenticated)
-
-```http
-POST /api/ratings/{gameId}
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "stars": 5,
-  "comment": "Great game!"
-}
-```
-
----
-
-## User Profile (Authenticated)
+## User Profile & Stats (Authenticated)
 
 ### Get Profile
 
 ```http
 GET /api/user/profile
 Authorization: Bearer <token>
+```
+
+**Response** (`200 OK`):
+
+```json
+{
+  "userId": "1",
+  "username": "player1",
+  "role": "user"
+}
+```
+
+### Update Profile
+
+```http
+PUT /api/user/profile
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "email": "newemail@example.com",
+  "password": "NewPassword123!"
+}
+```
+
+**Response** (`200 OK`):
+
+```json
+{
+  "message": "Profile updated successfully"
+}
 ```
 
 ### Get User Scores
@@ -168,99 +136,175 @@ GET /api/user/scores
 Authorization: Bearer <token>
 ```
 
-**Response**:
+**Response** (`200 OK`):
 
 ```json
-{
-  "scores": [
-    {
-      "gameId": "chess",
-      "wins": 15,
-      "losses": 8,
-      "points": 1250
-    }
-  ]
-}
+[
+  {
+    "userId": "player1",
+    "gameId": "chess",
+    "points": 1250,
+    "gamesPlayed": 23,
+    "wins": 15,
+    "losses": 8,
+    "totalTime": "PT1H30M",
+    "lastPlayed": "2026-09-15T10:00:00Z"
+  }
+]
 ```
 
 ---
 
-## Leaderboard
+## Game Discovery
+
+### List All Games
+
+```http
+GET /api/games?sort=name&q=chess
+```
+
+**Response** (`200 OK`):
+
+```json
+[
+  {
+    "id": "chess",
+    "name": "Chess",
+    "version": "1.0",
+    "author": "JGame",
+    "description": "Classic chess game",
+    "rules": "Standard chess rules",
+    "minPlayers": 2,
+    "maxPlayers": 2,
+    "metadata": {}
+  }
+]
+```
+
+### Get Game Details
+
+```http
+GET /api/games/{gameId}
+```
+
+---
+
+## Ratings & Reviews
+
+### Get Game Ratings
+
+```http
+GET /api/games/{gameId}/ratings
+```
+
+**Response** (`200 OK`):
+
+```json
+{
+  "ratings": [
+    {
+      "userId": "player1",
+      "gameId": "chess",
+      "stars": 5,
+      "comment": "Superb implementation!",
+      "createdAt": "2026-09-15T09:30:00Z",
+      "updatedAt": "2026-09-15T09:30:00Z"
+    }
+  ],
+  "average": 4.8,
+  "count": 12
+}
+```
+
+### Submit Rating (Authenticated)
+
+Comments are sanitized automatically against HTML/script injection.
+
+```http
+POST /api/ratings/{gameId}
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "stars": 5,
+  "comment": "Great strategic depth!"
+}
+```
+
+### Delete Rating (Authenticated)
+
+```http
+DELETE /api/ratings/{gameId}
+Authorization: Bearer <token>
+```
+
+---
+
+## Leaderboards
 
 ### Get Game Leaderboard
 
 ```http
-GET /api/scores/{gameId}/leaderboard
-Authorization: Bearer <token>
+GET /api/scores/{gameId}/leaderboard?limit=10
 ```
 
-**Response**:
+**Response** (`200 OK`):
 
 ```json
-{
-  "leaderboard": [
-    {"rank": 1, "username": "grandmaster", "points": 2500},
-    {"rank": 2, "username": "player1", "points": 1250}
-  ]
-}
+[
+  {
+    "userId": "grandmaster",
+    "gameId": "chess",
+    "points": 2500,
+    "gamesPlayed": 45,
+    "wins": 40,
+    "losses": 5
+  }
+]
 ```
 
 ---
 
-## Error Responses
+## Error Handling & Status Codes
 
 | Status Code | Description |
-|-------------|-------------|
-| 400 | Bad Request - Invalid input |
-| 401 | Unauthorized - Missing/invalid token |
-| 403 | Forbidden - Insufficient permissions |
-| 404 | Not Found - Resource doesn't exist |
-| 500 | Internal Server Error |
+|---|---|
+| `200 OK` | Request succeeded |
+| `201 Created` | Resource created |
+| `204 No Content` | Action succeeded with no body |
+| `400 Bad Request` | Validation failure or malformed payload |
+| `401 Unauthorized` | Missing, invalid, or revoked JWT token |
+| `404 Not Found` | Requested game, rating or resource not found |
+| `409 Conflict` | Username already registered |
+| `429 Too Many Requests` | Rate limit exceeded (brute-force defense) |
+| `500 Internal Server Error` | Unhandled server error |
 
-**Error Format**:
+**Standard Error Format**:
 
 ```json
 {
-  "success": false,
-  "error": "Error message here"
+  "error": "Error description message"
 }
 ```
 
 ---
 
-## WebSocket Events
+## Client Code Integration
 
-Connect to `ws://localhost:8080/ws/game/{gameId}` for real-time game updates.
-
-### Events
-
-| Event | Direction | Description |
-|-------|-----------|-------------|
-| `join` | Client → Server | Join game session |
-| `move` | Client → Server | Make a move |
-| `state` | Server → Client | Game state update |
-| `turn` | Server → Client | Turn notification |
-| `end` | Server → Client | Game over |
-
----
-
-## Code Examples
-
-### Java Client
+### Java Client Example
 
 ```java
 GameApiClient client = new GameApiClient("http://localhost:8080");
-client.login("player1", "password");
-List<Game> games = client.getGames();
+client.login("player1", "Password123!").thenAccept(res -> {
+    System.out.println("Logged in with token: " + res.token());
+});
 ```
 
-### JavaScript
+### JavaScript Web Client Example
 
 ```javascript
-const response = await fetch('/api/auth/login', {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
-  body: JSON.stringify({username: 'player1', password: 'pass'})
-});
-const {token} = await response.json();
+const api = new JGameAPI("http://localhost:8080");
+await api.login("player1", "Password123!");
+const games = await api.getGames();
 ```
+

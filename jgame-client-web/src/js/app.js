@@ -117,11 +117,23 @@ function checkAuth() {
     }
 }
 
+// Security helper to prevent XSS
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function updateAuthUI() {
     const authArea = document.getElementById('authArea');
+    if (!authArea) return;
     if (currentUser) {
         authArea.innerHTML = `
-            <span style="color: white;">👤 ${currentUser}</span>
+            <span style="color: white;">👤 ${escapeHtml(currentUser)}</span>
             <button class="btn btn-outline" onclick="logout()">${i18n.t('auth_logout')}</button>
         `;
     } else {

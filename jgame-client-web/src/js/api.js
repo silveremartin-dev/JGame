@@ -66,7 +66,14 @@ class JGameAPI {
         return data;
     }
 
-    logout() {
+    async logout() {
+        if (this.token) {
+            try {
+                await this.request('/api/auth/logout', { method: 'POST' });
+            } catch (e) {
+                console.warn('Logout API call failed:', e);
+            }
+        }
         this.setToken(null);
     }
 

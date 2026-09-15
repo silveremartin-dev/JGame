@@ -24,6 +24,7 @@
 package org.jgame.server.persistence.dao;
 
 import org.jgame.server.persistence.DatabaseManager;
+import org.jgame.util.PasswordEncoderSingleton;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -56,11 +57,16 @@ public class UserDAO {
      * Creates a new user in the database.
      * 
      * @param username     unique username
-     * @param passwordHash hashed password (never store plaintext!)
+     * @param password     raw or hashed password
      * @param email        user email
      * @return generated user ID, or -1 if failed
      */
-    public long createUser(String username, String passwordHash, String email) {
+    public long createUser(String username, String password, String email) {
+        String passwordHash = password;
+        if (password != null && !password.startsWith("$2a$") && !password.startsWith("$2b$")) {
+            passwordHash = PasswordEncoderSingleton.encode(password);
+        }
+
         String sql = "INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)";
 
         try (Connection conn = dbManager.getConnectionInternal();
@@ -114,26 +120,46 @@ public class UserDAO {
     }
 
     /**
-     * Verifies user credentials.
+     * Verifies user credentials using BCrypt.
      * 
-     * @param username     username
-     * @param passwordHash hashed password to verify
+     * @param username username
+     * @param password plaintext password to verify
      * @return user ID if credentials valid, -1 otherwise
      */
-    public long verifyCredentials(String username, String passwordHash) {
-        String sql = "SELECT id FROM users WHERE username = ? AND password_hash = ?";
+    public long verifyCredentials(String username, String password) {
+        if (username == null || password == null) {
+            return -1;
+        }
+
+        String sql = "SELECT id, password_hash FROM users WHERE username = ?";
 
         try (Connection conn = dbManager.getConnectionInternal();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, username);
-            stmt.setString(2, passwordHash);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     long userId = rs.getLong("id");
-                    updateLastLogin(userId);
-                    return userId;
+                    String storedHash = rs.getString("password_hash");
+
+                    boolean matches = false;
+                    if (storedHash != null) {
+                        if (storedHash.startsWith("$2a$") || storedHash.startsWith("$2b$")) {
+                            matches = PasswordEncoderSingleton.matches(password, storedHash);
+                        } else {
+                            // Fallback for legacy plaintext entries with automatic upgrade
+                            matches = storedHash.equals(password);
+                            if (matches) {
+                                updateUser(username, null, password);
+                            }
+                        }
+                    }
+
+                    if (matches) {
+                        updateLastLogin(userId);
+                        return userId;
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -214,12 +240,12 @@ public class UserDAO {
     /**
      * Updates user profile (email and/or password).
      *
-     * @param username     username to update
-     * @param email        new email (optional)
-     * @param passwordHash new hashed password (optional)
+     * @param username username to update
+     * @param email    new email (optional)
+     * @param password new raw password (optional, will be hashed)
      * @return true if updated, false otherwise
      */
-    public boolean updateUser(String username, String email, String passwordHash) {
+    public boolean updateUser(String username, String email, String password) {
         StringBuilder sql = new StringBuilder("UPDATE users SET ");
         List<Object> params = new ArrayList<>();
 
@@ -228,9 +254,13 @@ public class UserDAO {
             params.add(email);
         }
 
-        if (passwordHash != null) {
+        if (password != null) {
             if (!params.isEmpty()) {
                 sql.append(", ");
+            }
+            String passwordHash = password;
+            if (!password.startsWith("$2a$") && !password.startsWith("$2b$")) {
+                passwordHash = PasswordEncoderSingleton.encode(password);
             }
             sql.append("password_hash = ?");
             params.add(passwordHash);

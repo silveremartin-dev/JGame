@@ -99,6 +99,17 @@ public class GameApiClient {
     }
 
     /**
+     * Logs out the current user and clears the token.
+     */
+    public CompletableFuture<ApiResponse> logout() {
+        return post("/api/auth/logout", "{}", true)
+                .thenApply(response -> {
+                    this.authToken = null;
+                    return response;
+                });
+    }
+
+    /**
      * Gets list of available games.
      */
     public CompletableFuture<List<GameInfo>> getGames() {

@@ -148,6 +148,9 @@ public class LobbyManager {
                 // Remove lobby if empty or host left
                 if (lobby.getPlayerCount() == 0 || userId.equals(lobby.getHostId())) {
                     logger.info("Lobby {} removed (empty or host left)", lobbyId);
+                    for (String remainingPlayer : lobby.getPlayers()) {
+                        userToLobby.remove(remainingPlayer);
+                    }
                     return null; // Remove from map
                 }
                 return lobby;
