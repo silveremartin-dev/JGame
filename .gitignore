@@ -58,3 +58,6 @@ deadcode/
 
 # Generated documentation (can be regenerated)
 javadoc/
+
+# Deprecated/archived version
+v1/
